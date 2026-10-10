@@ -1,0 +1,30 @@
+<xf:title>{{ phrase('hampel_apiusers_add_api_user') }}</xf:title>
+
+<xf:form action="{{ link('api-users/save') }}" ajax="true" class="block">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:inforow rowtype="confirm">{{ phrase('hampel_apiusers_api_users_explain') }}</xf:inforow>
+
+			<xf:textboxrow name="username" maxlength="{{ max_length($xf.visitor, 'username') }}"
+				label="{{ phrase('user_name') }}" autofocus="autofocus" />
+
+			<xf:textboxrow name="note" maxlength="255"
+				label="{{ phrase('note') }}"
+				explain="{{ phrase('hampel_apiusers_note_explain') }}" />
+
+			<xf:if is="$canMakeAdmin">
+				<xf:checkboxrow>
+					<xf:option name="is_admin" value="1"
+						label="{{ phrase('hampel_apiusers_make_administrator') }}"
+						hint="{{ phrase('hampel_apiusers_make_administrator_explain') }}">
+						<xf:dependent>
+							<xf:passwordbox name="visitor_password" autocomplete="current-password"
+								placeholder="{{ phrase('your_password') }}" />
+						</xf:dependent>
+					</xf:option>
+				</xf:checkboxrow>
+			</xf:if>
+		</div>
+		<xf:submitrow icon="save" sticky="true" />
+	</div>
+</xf:form>

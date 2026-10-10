@@ -1,0 +1,11 @@
+{
+    "route_type": "admin",
+    "route_prefix": "api-users",
+    "sub_name": "",
+    "format": "",
+    "build_class": "",
+    "build_method": "",
+    "controller": "Hampel\\ApiUsers\\Admin\\Controller\\ApiUser",
+    "context": "hampelApiUsers",
+    "action_prefix": ""
+}

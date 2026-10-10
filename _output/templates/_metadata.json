@@ -1,0 +1,12 @@
+{
+    "admin/hampel_apiusers_add.html": {
+        "version_id": 1000011,
+        "version_string": "1.0.0a1",
+        "hash": "57710405da7b38a8b790b8c2e6b93468"
+    },
+    "admin/hampel_apiusers_list.html": {
+        "version_id": 1000011,
+        "version_string": "1.0.0a1",
+        "hash": "6b5c5080ae9d47f5633b9327ce24fa49"
+    }
+}

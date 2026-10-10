@@ -1,0 +1,64 @@
+<xf:title>{{ phrase('hampel_apiusers_api_users') }}</xf:title>
+
+<xf:pageaction>
+	<xf:button href="{{ link('api-users/add') }}" icon="add">{{ phrase('hampel_apiusers_add_api_user') }}</xf:button>
+</xf:pageaction>
+
+<div class="blockMessage">{{ phrase('hampel_apiusers_api_users_explain') }}</div>
+
+<xf:if is="$apiUsers is not empty">
+	<div class="block">
+		<div class="block-container">
+			<div class="block-body">
+				<xf:datalist>
+					<xf:foreach loop="$apiUsers" key="$userId" value="$apiUser">
+						<xf:datarow>
+							<xf:if is="$apiUser.User">
+								<xf:main href="{{ link('users/edit', $apiUser.User) }}">
+									<xf:label>
+										{$apiUser.User.username}
+										<xf:if is="$apiUser.User.is_admin">
+											<span class="label label--accent">{{ phrase('administrator') }}</span>
+										</xf:if>
+										<xf:if is="!$apiUser.User.Auth OR $apiUser.User.Auth.scheme_class != $apiOnlyScheme">
+											<span class="label label--error">{{ phrase('hampel_apiusers_not_api_only') }}</span>
+										</xf:if>
+									</xf:label>
+									<xf:hint>{$apiUser.note}</xf:hint>
+								</xf:main>
+							<xf:else />
+								<xf:main>
+									<xf:label>{{ phrase('deleted_member') }} ({$userId})</xf:label>
+									<xf:hint>{$apiUser.note}</xf:hint>
+								</xf:main>
+							</xf:if>
+							<xf:cell class="dataList-cell--min">
+								<xf:set var="$keyCount" value="{$apiKeyCounts.{$userId}}" />
+								<xf:if is="$keyCount">
+									{{ phrase('hampel_apiusers_x_api_keys', {'count': $keyCount}) }}
+								<xf:else />
+									<span class="u-muted">{{ phrase('hampel_apiusers_no_api_key') }}</span>
+								</xf:if>
+							</xf:cell>
+							<xf:cell class="dataList-cell--min">
+								<span class="u-muted">{{ phrase('hampel_apiusers_created_x_by_y', {
+									'date': date($apiUser.created_date),
+									'name': $apiUser.CreatedBy ? $apiUser.CreatedBy.username : phrase('hampel_apiusers_command_line')
+								}) }}</span>
+							</xf:cell>
+						</xf:datarow>
+					</xf:foreach>
+				</xf:datalist>
+			</div>
+			<div class="block-footer">
+				<span class="block-footer-counter">{{ display_totals($apiUsers, $total) }}</span>
+			</div>
+		</div>
+
+		<xf:pagenav page="{$page}" perpage="{$perPage}" total="{$total}"
+			link="api-users"
+			wrapperclass="block-outer block-outer--after" />
+	</div>
+<xf:else />
+	<div class="blockMessage">{{ phrase('hampel_apiusers_no_api_users') }}</div>
+</xf:if>

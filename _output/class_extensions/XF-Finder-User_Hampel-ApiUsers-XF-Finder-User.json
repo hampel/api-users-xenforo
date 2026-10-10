@@ -1,0 +1,6 @@
+{
+    "from_class": "XF\\Finder\\User",
+    "to_class": "Hampel\\ApiUsers\\XF\\Finder\\User",
+    "execute_order": 20,
+    "active": true
+}

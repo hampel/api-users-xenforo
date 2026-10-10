@@ -1,0 +1,1 @@
+An API user has no password and no email address, cannot log in, and is not shown to the public as a member. It can act only through an API key that names it.

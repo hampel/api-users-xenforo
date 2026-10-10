@@ -32,15 +32,28 @@ class Setup extends AbstractSetup
 	 * UserAuth::getAuthenticationHandler() - on a login attempt against that username and on the
 	 * administrator pages. That fails closed, but XF:NoPassword fails closed without the error.
 	 * Raw SQL because the entity guard would refuse the change, and by then should.
+	 *
+	 * The accounts are found with a plain read and updated by primary key. scheme_class has no
+	 * index, so updating by it scans and locks the whole table, and waits on any row another
+	 * transaction holds.
 	 */
 	public function uninstallStep1()
 	{
-		$this->db()->update(
-			'xf_user_authenticate',
-			['scheme_class' => 'XF:NoPassword', 'data' => serialize([])],
-			'scheme_class = ?',
-			ApiOnly::NAME
+		$db = $this->db();
+
+		$userIds = $db->fetchAllColumn(
+			'SELECT user_id FROM xf_user_authenticate WHERE scheme_class = ?', ApiOnly::NAME
 		);
+
+		foreach ($userIds AS $userId)
+		{
+			$db->update(
+				'xf_user_authenticate',
+				['scheme_class' => 'XF:NoPassword', 'data' => serialize([])],
+				'user_id = ?',
+				$userId
+			);
+		}
 	}
 
 	public function uninstallStep2()

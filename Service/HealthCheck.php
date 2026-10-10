@@ -82,12 +82,12 @@ class HealthCheck extends AbstractService
 
 	public function checkTable()
 	{
-		if (!$this->db()->getSchemaManager()->tableExists(self::TABLE))
+		if (!$this->db()->getSchemaManager()->tableExists(static::TABLE))
 		{
-			return [self::PROBLEM, self::TABLE . ' is missing, so no account is recorded as an API user.'];
+			return [self::PROBLEM, static::TABLE . ' is missing, so no account is recorded as an API user.'];
 		}
 
-		return [self::OK, self::TABLE];
+		return [self::OK, static::TABLE];
 	}
 
 	public function checkExtensions()
@@ -130,7 +130,7 @@ class HealthCheck extends AbstractService
 
 		$query = $this->finder('XF:User')->isValidUser()->getQuery();
 
-		if (strpos($query, self::TABLE) === false)
+		if (strpos($query, static::TABLE) === false)
 		{
 			return [self::PROBLEM, 'The valid-user query does not exclude API users, so they appear in '
 				. 'member lists and counts. Another add-on is probably replacing isValidUser() outside this one.'];
@@ -141,7 +141,7 @@ class HealthCheck extends AbstractService
 
 	public function checkAccounts()
 	{
-		$total = $this->db()->fetchOne('SELECT COUNT(*) FROM ' . self::TABLE);
+		$total = $this->db()->fetchOne('SELECT COUNT(*) FROM ' . static::TABLE);
 		if (!$total)
 		{
 			return [self::WARNING, 'There are no API users. Create one with api-users:create or under Setup > API users.'];
@@ -149,7 +149,7 @@ class HealthCheck extends AbstractService
 
 		$orphans = $this->db()->fetchAllColumn('
 			SELECT api_user.user_id
-			FROM ' . self::TABLE . ' AS api_user
+			FROM ' . static::TABLE . ' AS api_user
 			LEFT JOIN xf_user AS user ON (user.user_id = api_user.user_id)
 			WHERE user.user_id IS NULL
 		');
@@ -166,7 +166,7 @@ class HealthCheck extends AbstractService
 	{
 		$names = $this->db()->fetchAllColumn('
 			SELECT user.username
-			FROM ' . self::TABLE . ' AS api_user
+			FROM ' . static::TABLE . ' AS api_user
 			INNER JOIN xf_user AS user ON (user.user_id = api_user.user_id)
 			LEFT JOIN xf_user_authenticate AS auth ON (auth.user_id = api_user.user_id)
 			WHERE auth.scheme_class IS NULL OR auth.scheme_class <> ?
@@ -187,7 +187,7 @@ class HealthCheck extends AbstractService
 			SELECT user.username
 			FROM xf_user_authenticate AS auth
 			INNER JOIN xf_user AS user ON (user.user_id = auth.user_id)
-			LEFT JOIN ' . self::TABLE . ' AS api_user ON (api_user.user_id = auth.user_id)
+			LEFT JOIN ' . static::TABLE . ' AS api_user ON (api_user.user_id = auth.user_id)
 			WHERE auth.scheme_class = ? AND api_user.user_id IS NULL
 			ORDER BY user.username
 		', ApiOnly::NAME);
@@ -205,7 +205,7 @@ class HealthCheck extends AbstractService
 	{
 		$names = $this->db()->fetchAllColumn('
 			SELECT user.username
-			FROM ' . self::TABLE . ' AS api_user
+			FROM ' . static::TABLE . ' AS api_user
 			INNER JOIN xf_user AS user ON (user.user_id = api_user.user_id)
 			WHERE user.email <> \'\'
 			ORDER BY user.username
@@ -227,7 +227,7 @@ class HealthCheck extends AbstractService
 	{
 		$names = $this->db()->fetchAllColumn('
 			SELECT user.username
-			FROM ' . self::TABLE . ' AS api_user
+			FROM ' . static::TABLE . ' AS api_user
 			INNER JOIN xf_user AS user ON (user.user_id = api_user.user_id)
 			WHERE user.user_state <> \'valid\' OR user.is_banned = 1
 			ORDER BY user.username
@@ -246,7 +246,7 @@ class HealthCheck extends AbstractService
 	{
 		$names = $this->db()->fetchAllColumn('
 			SELECT user.username
-			FROM ' . self::TABLE . ' AS api_user
+			FROM ' . static::TABLE . ' AS api_user
 			INNER JOIN xf_user AS user ON (user.user_id = api_user.user_id)
 			LEFT JOIN xf_admin AS admin ON (admin.user_id = api_user.user_id)
 			WHERE user.is_admin = 1 AND admin.user_id IS NULL
@@ -260,7 +260,7 @@ class HealthCheck extends AbstractService
 
 		$admins = $this->db()->fetchOne('
 			SELECT COUNT(*)
-			FROM ' . self::TABLE . ' AS api_user
+			FROM ' . static::TABLE . ' AS api_user
 			INNER JOIN xf_admin AS admin ON (admin.user_id = api_user.user_id)
 		');
 
@@ -271,7 +271,7 @@ class HealthCheck extends AbstractService
 	{
 		$names = $this->db()->fetchAllColumn('
 			SELECT user.username
-			FROM ' . self::TABLE . ' AS api_user
+			FROM ' . static::TABLE . ' AS api_user
 			INNER JOIN xf_user AS user ON (user.user_id = api_user.user_id)
 			LEFT JOIN xf_api_key AS api_key ON (api_key.user_id = api_user.user_id AND api_key.active = 1)
 			WHERE api_key.api_key_id IS NULL
@@ -283,7 +283,7 @@ class HealthCheck extends AbstractService
 			return [self::WARNING, 'No active API key names: ' . implode(', ', $names) . '. Such an account can do nothing.'];
 		}
 
-		if (!$this->db()->fetchOne('SELECT COUNT(*) FROM ' . self::TABLE))
+		if (!$this->db()->fetchOne('SELECT COUNT(*) FROM ' . static::TABLE))
 		{
 			return [self::SKIPPED, 'There are no API users.'];
 		}
@@ -301,8 +301,7 @@ class HealthCheck extends AbstractService
 	 */
 	public function checkArchiveSite()
 	{
-		$addOns = \XF::app()->container('addon.cache');
-		if (!isset($addOns['Hampel/ArchiveSite']))
+		if (!$this->archiveSiteInstalled())
 		{
 			return [self::SKIPPED, 'Not installed.'];
 		}
@@ -312,7 +311,7 @@ class HealthCheck extends AbstractService
 
 		$unprotected = $this->db()->fetchPairs('
 			SELECT user.user_id, user.username
-			FROM ' . self::TABLE . ' AS api_user
+			FROM ' . static::TABLE . ' AS api_user
 			INNER JOIN xf_user AS user ON (user.user_id = api_user.user_id)
 			LEFT JOIN xf_admin AS admin ON (admin.user_id = api_user.user_id)
 			WHERE (admin.is_super_admin IS NULL OR admin.is_super_admin = 0)' . $placeholders . '
@@ -332,6 +331,16 @@ class HealthCheck extends AbstractService
 		}
 
 		return [self::OK, 'Every API user is protected from an archive run.'];
+	}
+
+	/**
+	 * @return bool
+	 */
+	protected function archiveSiteInstalled()
+	{
+		$addOns = \XF::app()->container('addon.cache');
+
+		return isset($addOns['Hampel/ArchiveSite']);
 	}
 
 	/**

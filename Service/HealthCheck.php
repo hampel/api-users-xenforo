@@ -33,9 +33,11 @@ class HealthCheck extends AbstractService
 		'table' => ['Environment', 'API user table', 'checkTable'],
 		'extensions' => ['Environment', 'Class extensions', 'checkExtensions'],
 		'listings' => ['Environment', 'Member listings', 'checkListings'],
+		'modifications' => ['Environment', 'User edit page', 'checkModifications'],
 		'accounts' => ['API users', 'Accounts', 'checkAccounts'],
 		'scheme' => ['API users', 'No password', 'checkScheme'],
 		'unrecorded' => ['API users', 'Unrecorded accounts', 'checkUnrecorded'],
+		'logins' => ['API users', 'No other way in', 'checkOtherLogins'],
 		'email' => ['API users', 'No email address', 'checkEmail'],
 		'state' => ['API users', 'Able to act', 'checkState'],
 		'admins' => ['API users', 'Administrators', 'checkAdmins'],
@@ -64,7 +66,7 @@ class HealthCheck extends AbstractService
 				// one check failing must not hide the rest: this runs when something is already wrong
 				\XF::logException($e, false, self::ERROR_LOG_PREFIX);
 
-				$status = self::PROBLEM;
+				$status = static::PROBLEM;
 				$detail = 'This check could not run: ' . $e->getMessage();
 			}
 
@@ -84,10 +86,10 @@ class HealthCheck extends AbstractService
 	{
 		if (!$this->db()->getSchemaManager()->tableExists(static::TABLE))
 		{
-			return [self::PROBLEM, static::TABLE . ' is missing, so no account is recorded as an API user.'];
+			return [static::PROBLEM, static::TABLE . ' is missing, so no account is recorded as an API user.'];
 		}
 
-		return [self::OK, static::TABLE];
+		return [static::OK, static::TABLE];
 	}
 
 	public function checkExtensions()
@@ -109,11 +111,11 @@ class HealthCheck extends AbstractService
 
 		if ($missing)
 		{
-			return [self::PROBLEM, 'Not applied: ' . implode(', ', $missing)
+			return [static::PROBLEM, 'Not applied: ' . implode(', ', $missing)
 				. '. An API user can be given a password or an email address, or is listed as a member.'];
 		}
 
-		return [self::OK, 'The password guard, the email guard and the member listing filter are applied.'];
+		return [static::OK, 'The password guard, the email guard and the member listing filter are applied.'];
 	}
 
 	/**
@@ -125,18 +127,55 @@ class HealthCheck extends AbstractService
 	{
 		if (\XF::app() instanceof \XF\Admin\App)
 		{
-			return [self::SKIPPED, 'Not checked from the control panel, where API users are listed on purpose.'];
+			return [static::SKIPPED, 'Not checked from the control panel, where API users are listed on purpose.'];
 		}
 
 		$query = $this->finder('XF:User')->isValidUser()->getQuery();
 
 		if (strpos($query, static::TABLE) === false)
 		{
-			return [self::PROBLEM, 'The valid-user query does not exclude API users, so they appear in '
+			return [static::PROBLEM, 'The valid-user query does not exclude API users, so they appear in '
 				. 'member lists and counts. Another add-on is probably replacing isValidUser() outside this one.'];
 		}
 
-		return [self::OK, 'The valid-user query excludes API users.'];
+		return [static::OK, 'The valid-user query excludes API users.'];
+	}
+
+	/**
+	 * The modifications to core's user edit page match text in a core template, so a XenForo
+	 * release that rewords it stops one matching and nothing errors. A warning: the entity guards
+	 * do not depend on them, only what an administrator is shown.
+	 */
+	public function checkModifications()
+	{
+		$mods = $this->db()->fetchAll('
+			SELECT m.modification_key, m.enabled, COALESCE(SUM(l.apply_count), 0) AS applied
+			FROM xf_template_modification AS m
+			LEFT JOIN xf_template_modification_log AS l ON (l.modification_id = m.modification_id)
+			WHERE m.addon_id = ?
+			GROUP BY m.modification_id
+		', 'Hampel/ApiUsers');
+
+		if (!$mods)
+		{
+			return [static::WARNING, 'None registered: the user edit page neither marks an API user nor offers to convert one.'];
+		}
+
+		$dead = [];
+		foreach ($mods AS $mod)
+		{
+			if (!$mod['enabled'] || !$mod['applied'])
+			{
+				$dead[] = $mod['modification_key'];
+			}
+		}
+
+		if ($dead)
+		{
+			return [static::WARNING, 'Disabled or matching nothing in the user edit template: ' . implode(', ', $dead) . '.'];
+		}
+
+		return [static::OK, count($mods) . ' modifications applying.'];
 	}
 
 	public function checkAccounts()
@@ -144,7 +183,7 @@ class HealthCheck extends AbstractService
 		$total = $this->db()->fetchOne('SELECT COUNT(*) FROM ' . static::TABLE);
 		if (!$total)
 		{
-			return [self::WARNING, 'There are no API users. Create one with api-users:create or under Setup > API users.'];
+			return [static::WARNING, 'There are no API users. Create one with api-users:create or under Setup > API users.'];
 		}
 
 		$orphans = $this->db()->fetchAllColumn('
@@ -155,11 +194,11 @@ class HealthCheck extends AbstractService
 		');
 		if ($orphans)
 		{
-			return [self::WARNING, $total . ' recorded, of which ' . count($orphans)
+			return [static::WARNING, $total . ' recorded, of which ' . count($orphans)
 				. ' name an account that no longer exists: user_id ' . implode(', ', $orphans) . '.'];
 		}
 
-		return [self::OK, $total . ' recorded.'];
+		return [static::OK, $total . ' recorded.'];
 	}
 
 	public function checkScheme()
@@ -175,10 +214,10 @@ class HealthCheck extends AbstractService
 
 		if ($names)
 		{
-			return [self::PROBLEM, 'Not on the API-only scheme, so possibly able to log in: ' . implode(', ', $names) . '.'];
+			return [static::PROBLEM, 'Not on the API-only scheme, so possibly able to log in: ' . implode(', ', $names) . '.'];
 		}
 
-		return [self::OK, 'Every API user is on the API-only scheme.'];
+		return [static::OK, 'Every API user is on the API-only scheme.'];
 	}
 
 	public function checkUnrecorded()
@@ -194,11 +233,48 @@ class HealthCheck extends AbstractService
 
 		if ($names)
 		{
-			return [self::PROBLEM, 'On the API-only scheme but not recorded as API users, so neither hidden '
+			return [static::PROBLEM, 'On the API-only scheme but not recorded as API users, so neither hidden '
 				. 'nor guarded: ' . implode(', ', $names) . '.'];
 		}
 
-		return [self::OK, 'No account is on the API-only scheme without being recorded.'];
+		return [static::OK, 'No account is on the API-only scheme without being recorded.'];
+	}
+
+	/**
+	 * A connected account or a passkey logs its user in whatever the authentication scheme says.
+	 */
+	public function checkOtherLogins()
+	{
+		$db = $this->db();
+		$sm = $db->getSchemaManager();
+
+		$names = $db->fetchAllColumn('
+			SELECT DISTINCT user.username
+			FROM ' . static::TABLE . ' AS api_user
+			INNER JOIN xf_user AS user ON (user.user_id = api_user.user_id)
+			INNER JOIN xf_user_connected_account AS connected ON (connected.user_id = api_user.user_id)
+			ORDER BY user.username
+		');
+
+		// XenForo 2.3 only
+		if ($sm->tableExists('xf_passkey'))
+		{
+			$names = array_unique(array_merge($names, $db->fetchAllColumn('
+				SELECT DISTINCT user.username
+				FROM ' . static::TABLE . ' AS api_user
+				INNER JOIN xf_user AS user ON (user.user_id = api_user.user_id)
+				INNER JOIN xf_passkey AS passkey ON (passkey.user_id = api_user.user_id)
+				ORDER BY user.username
+			')));
+		}
+
+		if ($names)
+		{
+			return [static::PROBLEM, 'Has a connected account or a passkey, so can log in without a password: '
+				. implode(', ', $names) . '.'];
+		}
+
+		return [static::OK, 'No API user has a connected account or a passkey.'];
 	}
 
 	public function checkEmail()
@@ -213,10 +289,10 @@ class HealthCheck extends AbstractService
 
 		if ($names)
 		{
-			return [self::PROBLEM, 'Has an email address: ' . implode(', ', $names) . '.'];
+			return [static::PROBLEM, 'Has an email address: ' . implode(', ', $names) . '.'];
 		}
 
-		return [self::OK, 'No API user has an email address.'];
+		return [static::OK, 'No API user has an email address.'];
 	}
 
 	/**
@@ -235,11 +311,11 @@ class HealthCheck extends AbstractService
 
 		if ($names)
 		{
-			return [self::WARNING, 'Banned or not in the valid state, so the API treats its key as a guest: '
+			return [static::WARNING, 'Banned or not in the valid state, so the API treats its key as a guest: '
 				. implode(', ', $names) . '.'];
 		}
 
-		return [self::OK, 'Every API user is valid and not banned.'];
+		return [static::OK, 'Every API user is valid and not banned.'];
 	}
 
 	public function checkAdmins()
@@ -255,7 +331,7 @@ class HealthCheck extends AbstractService
 
 		if ($names)
 		{
-			return [self::PROBLEM, 'Flagged as an administrator with no administrator record: ' . implode(', ', $names) . '.'];
+			return [static::PROBLEM, 'Flagged as an administrator with no administrator record: ' . implode(', ', $names) . '.'];
 		}
 
 		$admins = $this->db()->fetchOne('
@@ -264,7 +340,7 @@ class HealthCheck extends AbstractService
 			INNER JOIN xf_admin AS admin ON (admin.user_id = api_user.user_id)
 		');
 
-		return [self::OK, $admins . ' of the API users ' . ($admins == 1 ? 'is an administrator.' : 'are administrators.')];
+		return [static::OK, $admins . ' of the API users ' . ($admins == 1 ? 'is an administrator.' : 'are administrators.')];
 	}
 
 	public function checkKeys()
@@ -280,15 +356,15 @@ class HealthCheck extends AbstractService
 
 		if ($names)
 		{
-			return [self::WARNING, 'No active API key names: ' . implode(', ', $names) . '. Such an account can do nothing.'];
+			return [static::WARNING, 'No active API key names: ' . implode(', ', $names) . '. Such an account can do nothing.'];
 		}
 
 		if (!$this->db()->fetchOne('SELECT COUNT(*) FROM ' . static::TABLE))
 		{
-			return [self::SKIPPED, 'There are no API users.'];
+			return [static::SKIPPED, 'There are no API users.'];
 		}
 
-		return [self::OK, 'Every API user is named by an active API key.'];
+		return [static::OK, 'Every API user is named by an active API key.'];
 	}
 
 	/**
@@ -303,7 +379,7 @@ class HealthCheck extends AbstractService
 	{
 		if (!$this->archiveSiteInstalled())
 		{
-			return [self::SKIPPED, 'Not installed.'];
+			return [static::SKIPPED, 'Not installed.'];
 		}
 
 		$protected = $this->archiveSiteProtectedUserIds();
@@ -326,11 +402,11 @@ class HealthCheck extends AbstractService
 				$list[] = "{$username} ({$userId})";
 			}
 
-			return [self::WARNING, 'Not protected from an archive run, which would stop at the account: '
+			return [static::WARNING, 'Not protected from an archive run, which would stop at the account: '
 				. implode(', ', $list) . ". Add each user_id to \$config['archiveSite']['protectedUsers']."];
 		}
 
-		return [self::OK, 'Every API user is protected from an archive run.'];
+		return [static::OK, 'Every API user is protected from an archive run.'];
 	}
 
 	/**

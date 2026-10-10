@@ -1,6 +1,5 @@
 <?php namespace Hampel\ApiUsers\Service\ApiUser;
 
-use Hampel\ApiUsers\Authentication\ApiOnly;
 use XF\Entity\User;
 use XF\Service\AbstractService;
 use XF\Service\ValidateAndSavableTrait;
@@ -39,32 +38,13 @@ class Creator extends AbstractService
 	{
 		/** @var User $user */
 		$user = $this->repository('XF:User')->setupBaseUser();
-		$user->setOption('admin_edit', true);
-
 		$user->username = $username;
-		$user->email = '';
 
 		// Anything but valid and the REST API resolves the key's user to the guest permission
 		// combination, which reads as a permissions fault and is not one.
 		$user->user_state = 'valid';
 
-		// Set on the account as well as enforced by the class extensions, because core honours
-		// these with the add-on disabled and the extensions stop.
-		$user->visible = false;
-		$user->activity_visible = false;
-
-		$user->Auth->scheme_class = ApiOnly::NAME;
-		$user->Auth->data = [];
-
-		$user->Privacy->bulkSet([
-			'allow_view_profile' => 'none',
-			'allow_post_profile' => 'none',
-			'allow_send_personal_conversation' => 'none',
-			'allow_view_identities' => 'none',
-			'allow_receive_news_feed' => 'none',
-		]);
-
-		$user->Option->receive_admin_email = false;
+		$this->repository('Hampel\ApiUsers:ApiUser')->applyApiUserShape($user);
 
 		return $user;
 	}

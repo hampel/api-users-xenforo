@@ -1,0 +1,1 @@
+None. An API user cannot have one.

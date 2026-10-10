@@ -1,0 +1,1 @@
+This account is an API user. It has no password and no email address, cannot log in, and is not shown to the public as a member.

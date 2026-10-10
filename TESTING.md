@@ -15,12 +15,13 @@ checked. For whoever changes it next.
 | admin route | `api-users/` → `Admin\Controller\ApiUser` |
 | admin permission | `hampelApiUsers` |
 | admin navigation | `hampelApiUsers`, under `serviceProviders` |
-| templates | admin `hampel_apiusers_list`, `hampel_apiusers_add` |
+| templates | admin `hampel_apiusers_list`, `hampel_apiusers_add`, `hampel_apiusers_convert` |
+| template modification | admin `user_edit` × 4 — notice, convert action, email field, password field |
 | CLI command | `api-users:create`, `api-users:list`, `api-users:validate` |
 | code event listener | `hampel_admin_api_redaction` → `Listener::adminApiRedaction` |
 | config key read | another add-on's: `archiveSite.protectedUsers`, `archiveSiteProtectedUsers` |
 
-No options, cron entries, jobs, template modifications or public templates.
+No options, cron entries, jobs or public templates.
 
 ## Running the suite
 
@@ -53,6 +54,8 @@ They create real accounts and roll them back. Two consequences:
 - `HealthCheckTest`, `CommandsTest` — each drift a guard cannot prevent is reported, and the exit
   contract.
 - `SetupTest` — the first uninstall step.
+- `ConverterTest` — what conversion removes and keeps, each refusal, and that a table an add-on
+  registers counts as content.
 
 **Each guard was switched off in turn and the suite failed every time**, on 2026-10-10: the two
 entity guards, the listing exclusion, its control panel exemption, the profile check,

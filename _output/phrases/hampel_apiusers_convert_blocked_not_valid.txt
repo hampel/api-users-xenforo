@@ -1,0 +1,1 @@
+It is banned or not in the valid state. An API key naming it would be treated as a guest.

@@ -47,6 +47,31 @@ own once the account has no email and a scheme that never authenticates.
   `_output/class_extensions` file: `xf-make:extension` refuses that name on 2.3. Its
   `_metadata.json` entry is the file's md5.
 
+## Converting an account removes every way in, not only the password
+
+**A connected account or a passkey logs its user in whatever the authentication scheme says**, so
+`Service\ApiUser\Converter` deletes those, two-step verification, saved logins, pending
+confirmations and OAuth tokens before it sets the scheme, and changes `password_date` so existing
+sessions are dropped. `HealthCheck::checkOtherLogins()` reports an API user that has acquired
+one since.
+
+**What counts as content is core's own map, minus a list of bookkeeping tables.** The map is the
+`$updates` property of `XF:User\ContentChange`, the service core uses to rename, merge and delete a
+user, extended by add-ons through `user_content_change_init`. Core offers no getter, so it is read
+by reflection. `Converter::NOT_CONTENT` lists the tables in it that an unused account can still
+have rows in. **A table not on that list counts as content, including one from an add-on nobody
+here has heard of** — the unknown case refuses, which is the safe direction for something that
+cannot be undone.
+
+## The user edit page is changed by four template modifications, and only for display
+
+A notice, the *Convert to API user* action, and the email and password fields replaced by a note.
+**None of them is the enforcement** — the entity guards are, and they hold with every modification
+disabled. Core's save reads an absent email field as empty and an absent password choice as
+no change, which is why hiding the fields is safe. The email and password modifications are
+regular expressions because the email row differs between XenForo 2.2 and 2.3.
+`HealthCheck::checkModifications()` warns when one stops matching.
+
 ## No `api-users:config`, by decision
 
 The add-on has no options and no config key of its own, and `api-users:list` already prints its
@@ -61,6 +86,8 @@ The floor is 2.2.0 and PHP 7.4. Use short class names (`'XF:User'`, `'XF:User\Lo
 
 ## Not done, on purpose
 
-- **No conversion of an existing account**, to or from an API user.
+- **No conversion of an API user back into an ordinary account.** That is the hole the guarantee
+  exists to close.
+- **No `api-users:convert` command.** Conversion is offered on the user edit page only.
 - **No granting of admin permissions from the CLI, and no minting of an API key.** Both are
   additive later; core's pages do them today.

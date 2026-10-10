@@ -1,0 +1,9 @@
+{
+    "template": "user_edit",
+    "description": "Add Convert to API user to the actions menu of the user edit page",
+    "execution_order": 10,
+    "enabled": true,
+    "action": "str_replace",
+    "find": "<!--[XF:actions_menu:bottom]-->",
+    "replace": "<xf:if is=\"!$user.ApiUser AND $xf.visitor.hasAdminPermission('hampelApiUsers')\">\n\t\t\t\t\t<a href=\"{{ link('api-users/convert', $user) }}\" class=\"menu-linkRow\" data-xf-click=\"overlay\">{{ phrase('hampel_apiusers_convert_to_api_user') }}</a>\n\t\t\t\t</xf:if>\n\t\t\t\t$0"
+}

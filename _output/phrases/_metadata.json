@@ -53,6 +53,60 @@
         "version_string": "1.0.0a1",
         "hash": "760fbdfafca0cf0cfd2502103679fc22"
     },
+    "hampel_apiusers_convert_blocked_already_api_user.txt": {
+        "global_cache": false,
+        "version_id": 1000011,
+        "version_string": "1.0.0a1",
+        "hash": "939d706a8967d1895d5137fa3bd861d6"
+    },
+    "hampel_apiusers_convert_blocked_has_content.txt": {
+        "global_cache": false,
+        "version_id": 1000011,
+        "version_string": "1.0.0a1",
+        "hash": "ddb399eb6369578834abba21af909830"
+    },
+    "hampel_apiusers_convert_blocked_moderator.txt": {
+        "global_cache": false,
+        "version_id": 1000011,
+        "version_string": "1.0.0a1",
+        "hash": "faedbd4e279f14c4c9d4399aae014e91"
+    },
+    "hampel_apiusers_convert_blocked_not_valid.txt": {
+        "global_cache": false,
+        "version_id": 1000011,
+        "version_string": "1.0.0a1",
+        "hash": "9c27d3230da669c9b329710cd1e2332d"
+    },
+    "hampel_apiusers_convert_blocked_own_account.txt": {
+        "global_cache": false,
+        "version_id": 1000011,
+        "version_string": "1.0.0a1",
+        "hash": "ec748d36503355eb99663680a287a5a5"
+    },
+    "hampel_apiusers_convert_cannot_be_undone.txt": {
+        "global_cache": false,
+        "version_id": 1000011,
+        "version_string": "1.0.0a1",
+        "hash": "d581efcab24a584039f1c47622cdcfb8"
+    },
+    "hampel_apiusers_convert_explain.txt": {
+        "global_cache": false,
+        "version_id": 1000011,
+        "version_string": "1.0.0a1",
+        "hash": "1bdb34244debc6ae3fa7cb2090723c8a"
+    },
+    "hampel_apiusers_convert_to_api_user.txt": {
+        "global_cache": false,
+        "version_id": 1000011,
+        "version_string": "1.0.0a1",
+        "hash": "ece065df2eb52472129b12867370eb5f"
+    },
+    "hampel_apiusers_convert_x_to_api_user.txt": {
+        "global_cache": false,
+        "version_id": 1000011,
+        "version_string": "1.0.0a1",
+        "hash": "244d5947fff19c00087295cc5e0e8988"
+    },
     "hampel_apiusers_created_x_by_y.txt": {
         "global_cache": false,
         "version_id": 1000011,
@@ -89,6 +143,12 @@
         "version_string": "1.0.0a1",
         "hash": "c9c0d02d99ecaf5be56c94ed5304c787"
     },
+    "hampel_apiusers_none_api_user_cannot_have_one.txt": {
+        "global_cache": false,
+        "version_id": 1000011,
+        "version_string": "1.0.0a1",
+        "hash": "439ae5ee6cff71976dc95f61919d785f"
+    },
     "hampel_apiusers_not_api_only.txt": {
         "global_cache": false,
         "version_id": 1000011,
@@ -107,10 +167,28 @@
         "version_string": "1.0.0a1",
         "hash": "049af4c48f7ad364371f384dd8c5fce6"
     },
+    "hampel_apiusers_this_account_is_api_user.txt": {
+        "global_cache": false,
+        "version_id": 1000011,
+        "version_string": "1.0.0a1",
+        "hash": "a61ec5ed62e57e9feb63ce224dd02d1d"
+    },
     "hampel_apiusers_x_api_keys.txt": {
         "global_cache": false,
         "version_id": 1000011,
         "version_string": "1.0.0a1",
         "hash": "23a3524d46b27f3da3ca20c8c9307c64"
+    },
+    "hampel_apiusers_x_cannot_be_converted.txt": {
+        "global_cache": false,
+        "version_id": 1000011,
+        "version_string": "1.0.0a1",
+        "hash": "6effa192f8d6ca1e0bb79e89fcb84b97"
+    },
+    "hampel_apiusers_x_is_now_api_user.txt": {
+        "global_cache": false,
+        "version_id": 1000011,
+        "version_string": "1.0.0a1",
+        "hash": "09a3a667065633848fc63360f3af8f7e"
     }
 }

@@ -1,0 +1,1 @@
+This cannot be undone: the email address and password are not kept anywhere.

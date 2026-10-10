@@ -1,0 +1,1 @@
+Converting this account removes its email address and password, along with any connected accounts, passkeys, two-step verification and saved logins. It will no longer be able to log in, and it will be hidden from the public as a member. Its API keys are kept.

@@ -1,0 +1,9 @@
+{
+    "template": "user_edit",
+    "description": "Say at the top of the user edit page that the account is an API user",
+    "execution_order": 10,
+    "enabled": true,
+    "action": "str_replace",
+    "find": "<xf:if is=\"$success\">",
+    "replace": "<xf:if is=\"$user.user_id AND $user.ApiUser\">\n\t<div class=\"blockMessage blockMessage--important blockMessage--iconic\">\n\t\t{{ phrase('hampel_apiusers_this_account_is_api_user') }}\n\t\t<xf:if is=\"$xf.visitor.hasAdminPermission('hampelApiUsers')\"><a href=\"{{ link('api-users') }}\">{{ phrase('hampel_apiusers_api_users') }}</a></xf:if>\n\t</div>\n</xf:if>\n\n$0"
+}

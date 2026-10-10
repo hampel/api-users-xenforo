@@ -37,6 +37,7 @@ connected account, and those are left alone.
 | is not listed as a member | left out of the member list, member counts, newest members, statistics and name lookups |
 | has no public profile | viewable only by staff who can bypass user privacy |
 | is still found in the control panel | user search and the username autocomplete both find it |
+| is marked on its edit page | a notice at the top, and the email and password fields replaced by a note |
 
 **Hiding the account does not hide what it writes.** An API user that creates a thread through the
 API is named on it, like any member.
@@ -58,6 +59,21 @@ php cmd.php api-users:create "Monitor" --note="what it is for"
 php cmd.php api-users:create "Monitor" --admin
 php cmd.php api-users:list
 ```
+
+### From an existing account
+
+On a user's edit page, *Actions > Convert to API user* turns that account into an API user. It
+needs the **Manage API users** permission.
+
+**It removes the account's email address and password, and every other way it could log in** —
+connected accounts, passkeys, two-step verification, saved logins and OAuth tokens. Its API keys
+and any administrator record are kept. This cannot be undone.
+
+**An account that has been used as a member is refused**, and the page says where its content is.
+So are a banned or unconfirmed account, a moderator, and your own account. Content means anything
+XenForo itself would reassign when merging or deleting a user — posts, conversations, reactions,
+attachments, media, resources and whatever an installed add-on registers — and not bookkeeping
+such as login records or alerts.
 
 ### Then give it a key
 
@@ -94,7 +110,7 @@ writes nor sends.
   — is not refused. `api-users:validate` reports the result as a failure.
 - **A disabled add-on does not guard.** While it is disabled an API user still cannot log in, but
   the user edit form can give it a password. Run `api-users:validate` after enabling it again.
-- **Existing accounts cannot be converted**, in either direction. Create an API user, or delete one.
+- **An API user cannot be converted back** into an ordinary account. Delete it and create a new one.
 
 ## With Archive Site
 

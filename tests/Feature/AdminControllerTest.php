@@ -119,6 +119,70 @@ class AdminControllerTest extends TestCase
 		));
 	}
 
+	public function test_converting_needs_the_manage_api_users_permission()
+	{
+		$this->admin(['user']);
+		$member = $this->createMember();
+
+		$this->assertReplyIsError($this->dispatch('api-users/' . $member->user_id . '/convert', 'admin'), 403);
+		$this->assertReplyIsError($this->dispatch('api-users/' . $member->user_id . '/convert', 'admin', [], [], 'POST'), 403);
+		$this->assertNotSame('', $this->app()->db()->fetchOne('SELECT email FROM xf_user WHERE user_id = ?', $member->user_id));
+	}
+
+	public function test_the_convert_page_asks_first_and_changes_nothing()
+	{
+		$this->admin(['hampelApiUsers']);
+		$member = $this->createMember();
+
+		$reply = $this->dispatch('api-users/' . $member->user_id . '/convert', 'admin');
+
+		$this->assertReplyIsView($reply);
+		$this->assertReplyTemplate($reply, 'hampel_apiusers_convert');
+		$this->assertSame([], $reply->getParam('blockers'));
+		$this->assertNotSame('', $this->app()->db()->fetchOne('SELECT email FROM xf_user WHERE user_id = ?', $member->user_id));
+	}
+
+	public function test_confirming_converts_the_account_and_records_who_did_it()
+	{
+		$admin = $this->admin(['hampelApiUsers']);
+		$member = $this->createMember();
+
+		$reply = $this->dispatch('api-users/' . $member->user_id . '/convert', 'admin', ['note' => 'the old bot'], [], 'POST');
+
+		$this->assertReplyIsRedirect($reply);
+		$this->assertIsApiOnly($member->user_id);
+
+		$row = $this->app()->db()->fetchRow('SELECT * FROM xf_hampel_apiusers_user WHERE user_id = ?', $member->user_id);
+		$this->assertSame('the old bot', $row['note']);
+		$this->assertEquals($admin->user_id, $row['created_by_user_id']);
+	}
+
+	public function test_an_account_with_content_is_shown_why_and_cannot_be_converted()
+	{
+		$this->admin(['hampelApiUsers']);
+		$member = $this->createMember();
+		$this->app()->db()->insert('xf_poll_vote', [
+			'user_id' => $member->user_id, 'poll_response_id' => 2147480000, 'poll_id' => 2147480000, 'vote_date' => 1,
+		]);
+
+		$this->assertNotEmpty($this->dispatch('api-users/' . $member->user_id . '/convert', 'admin')->getParam('blockers'));
+		$this->assertReplyIsError($this->dispatch('api-users/' . $member->user_id . '/convert', 'admin', [], [], 'POST'));
+		$this->assertNotSame('', $this->app()->db()->fetchOne('SELECT email FROM xf_user WHERE user_id = ?', $member->user_id));
+	}
+
+	public function test_only_a_super_administrator_can_convert_a_super_administrator()
+	{
+		$this->admin(['hampelApiUsers']);
+		$member = $this->createMember();
+		$record = $this->app()->em()->create('XF:Admin');
+		$record->bulkSet(['user_id' => $member->user_id, 'is_super_admin' => true]);
+		$record->save();
+		$this->app()->em()->clearEntityCache();
+
+		$this->assertReplyIsError($this->dispatch('api-users/' . $member->user_id . '/convert', 'admin', [], [], 'POST'));
+		$this->assertNotSame('', $this->app()->db()->fetchOne('SELECT email FROM xf_user WHERE user_id = ?', $member->user_id));
+	}
+
 	public function test_the_add_form_offers_the_administrator_option_only_to_those_who_may_use_it()
 	{
 		$this->admin(['hampelApiUsers']);

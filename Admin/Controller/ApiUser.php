@@ -84,6 +84,46 @@ class ApiUser extends AbstractController
 		);
 	}
 
+	public function actionConvert(ParameterBag $params)
+	{
+		/** @var \XF\Entity\User $user */
+		$user = $this->assertRecordExists('XF:User', $params->user_id, ['Auth', 'ApiUser'], 'requested_user_not_found');
+
+		// the same rule core's own user edit page applies
+		if ($user->is_super_admin && !\XF::visitor()->is_super_admin)
+		{
+			return $this->error(\XF::phrase('you_must_be_super_administrator_to_edit_user'));
+		}
+
+		/** @var \Hampel\ApiUsers\Service\ApiUser\Converter $converter */
+		$converter = $this->service('Hampel\ApiUsers:ApiUser\Converter', $user);
+		$converter->setNote($this->filter('note', 'str'));
+		$converter->setCreatedBy(\XF::visitor());
+
+		$blockers = $converter->getBlockers();
+
+		if ($this->isPost())
+		{
+			if ($blockers)
+			{
+				return $this->error($blockers);
+			}
+
+			$converter->convert();
+
+			return $this->redirect(
+				$this->buildLink('users/edit', $user),
+				\XF::phrase('hampel_apiusers_x_is_now_api_user', ['name' => $user->username])
+			);
+		}
+
+		$viewParams = [
+			'user' => $user,
+			'blockers' => $blockers,
+		];
+		return $this->view('Hampel\ApiUsers:ApiUser\Convert', 'hampel_apiusers_convert', $viewParams);
+	}
+
 	/**
 	 * @return bool
 	 */

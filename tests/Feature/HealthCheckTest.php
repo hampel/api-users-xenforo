@@ -119,6 +119,30 @@ class HealthCheckTest extends TestCase
 		$this->assertSame(HealthCheck::PROBLEM, $this->statuses()['email']);
 	}
 
+	public function test_an_api_user_with_a_connected_account_is_a_problem()
+	{
+		$user = $this->healthyApiUser();
+		$this->app()->db()->insert('xf_user_connected_account', [
+			'user_id' => $user->user_id, 'provider' => 'github', 'provider_key' => 'apiusers-test-' . $user->user_id, 'extra_data' => '[]',
+		]);
+
+		$this->assertSame(HealthCheck::PROBLEM, $this->statuses()['logins']);
+		$this->assertStringContainsString($user->username, $this->detail('logins'));
+	}
+
+	public function test_a_user_edit_modification_that_stops_matching_is_a_warning()
+	{
+		$this->assertSame(HealthCheck::OK, $this->statuses()['modifications']);
+
+		$id = $this->app()->db()->fetchOne(
+			'SELECT modification_id FROM xf_template_modification WHERE modification_key = ?', 'hampelApiUsersUserEditEmail'
+		);
+		$this->app()->db()->update('xf_template_modification_log', ['apply_count' => 0], 'modification_id = ?', $id);
+
+		$this->assertSame(HealthCheck::WARNING, $this->statuses()['modifications']);
+		$this->assertStringContainsString('hampelApiUsersUserEditEmail', $this->detail('modifications'));
+	}
+
 	public function test_a_banned_or_invalid_api_user_is_a_warning()
 	{
 		$user = $this->healthyApiUser();

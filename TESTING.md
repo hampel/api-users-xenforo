@@ -85,7 +85,22 @@ Patch 2 with PHP 7.4.33 and on 2.3.13 with PHP 8.3. The same on both unless note
   extension, phrase, permission, navigation entry, route or listener left behind, the forum index
   rendering, and a login attempt against a surviving account still refused.
 
+**The user edit page and conversion, on 2026-10-10**, on the same 2.3.13 instance after upgrading
+it from the `1.0.0a1` zip to `1.0.0a2` by the real import path:
+
+- all four modifications logged as applied, and `validate` reporting them;
+- an API user's edit page shows the notice and the note, and has no email input, no password
+  choice and no convert action; an ordinary member's has all three and no notice; the add-user
+  page is unchanged;
+- the convert page asks first, and refuses the acting administrator's own account;
+- a member made through core's own form, with an email address and a password, converted: email
+  gone, scheme API-only, hidden, recorded with the note, and its old password refused at login;
+- core's edit form, posted without the hidden fields, still saves.
+
 ## Not yet proved
+
+- **The four modifications on XenForo 2.2.** Each `find` matches the 2.2.19 `user_edit` template
+  exactly once, checked against the template text; they have not been compiled or rendered there.
 
 - Uninstall on 2.3 from the release zip.
 - The pages looked at by a person in a browser, which is the only check on how they read.

@@ -58,9 +58,33 @@ They create real accounts and roll them back. Two consequences:
 entity guards, the listing exclusion, its control panel exemption, the profile check,
 `hasPassword()`, and both administrator checks in the controller.
 
-## Needs a sandbox
+## Proved in a sandbox
 
-- Install and uninstall from the release zip, on XenForo 2.2 and 2.3.
-- A login attempt against a surviving account after uninstall.
-- The admin pages rendered in a browser.
-- With Archive Site installed: the listing exclusion, and the `validate` warning.
+**Run on 2026-10-10 from the `1.0.0a1` release zip, with development off**, on XenForo 2.2.19
+Patch 2 with PHP 7.4.33 and on 2.3.13 with PHP 8.3. The same on both unless noted:
+
+- **Install**: imported from `_data`, no `_output/` created, every PHP file lints on 7.4.
+- **Commands**, exit codes read through `docker exec`: `validate` 0 and `--strict` 2 with a
+  warning present; `create` 0, and 1 for a name in use.
+- **The REST API**, with a user key naming an API administrator: `GET api/me` answers as that
+  account; `POST api/me/password` and `api/me/email` are refused.
+- **The public side**, as a guest: the profile is a 403, the member list names no API user, and a
+  login attempt answers *Incorrect password*.
+- **The control panel**, logged in over HTTP: the list and add pages render; a save creates the
+  account recorded against the acting administrator; the administrator option is refused on a
+  wrong password; user search and the username autocomplete find API users.
+- **Core's own forms**: editing an API administrator's permissions, and adding an API user as an
+  administrator, both save with the scheme untouched, no row in `xf_user_confirmation` and nothing
+  in Mailpit. The user edit form is refused a password and refused an email address, and saves a
+  custom title.
+- **`xf_error_log` stayed empty throughout.**
+- **Uninstall, on 2.2 only**: every API user moved to `XF:NoPassword`, the table dropped, no
+  extension, phrase, permission, navigation entry, route or listener left behind, the forum index
+  rendering, and a login attempt against a surviving account still refused.
+
+## Not yet proved
+
+- Uninstall on 2.3 from the release zip.
+- The pages looked at by a person in a browser, which is the only check on how they read.
+- Archive Site installed beside it in a sandbox. On the development forum, where it is installed,
+  the valid-user query carries both add-ons' conditions and `validate` gives the warning.

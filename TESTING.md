@@ -23,7 +23,31 @@ checked. For whoever changes it next.
 
 No options, cron entries, jobs or public templates.
 
-## Running the suite
+## Fragile points
+
+- **An extension that replaces `isValidUser()` without calling its parent discards the exclusion.**
+  This add-on registers at `execute_order` 20 to sit outside most others, which does not help
+  against one registered higher. `api-users:validate` reads the built query, so it reports this.
+- **The four `user_edit` modifications stop applying when core rewords that template.** The
+  upgrade succeeds and the notice, the convert action and the two notes vanish. Nothing is
+  unguarded when they do: the entity guards refuse a password and an email address with every
+  modification disabled. `validate` warns for each one that no longer matches.
+- **The table and the scheme can be made to disagree from outside**, by a direct database edit or
+  by code that writes `xf_user_authenticate` without the entity. The guards run on entity saves
+  only. `validate` fails in either direction.
+- **Conversion only knows the content tables that are registered with core.** A table counts as
+  content when it is in the map core uses to rename and delete a user. An add-on that keeps a
+  member's content in a table it never registered there is invisible, and an account with rows in
+  it converts.
+- **Conversion only removes the ways in that it knows.** An add-on that adds a login route of its
+  own, keyed on something other than the password, a connected account, a passkey or an OAuth
+  token, is not covered, and `validate` does not look for it.
+- **Beside Archive Site, an API user that is not in its protected list is treated as a member to
+  archive.** `validate` warns for each one missing from the list.
+
+## Automated
+
+### Running the suite
 
 ```bash
 composer install
@@ -39,7 +63,7 @@ They create real accounts and roll them back. Two consequences:
 - **Nothing that runs DDL can be tested this way**: it commits the transaction. The second
   uninstall step is proved in a sandbox instead.
 
-## What the suite proves
+### What the suite proves
 
 - `ApiOnlyTest` — the scheme never authenticates, reports a password, is not upgradable, and its
   stored name resolves back to the class.
@@ -61,7 +85,7 @@ They create real accounts and roll them back. Two consequences:
 entity guards, the listing exclusion, its control panel exemption, the profile check,
 `hasPassword()`, and both administrator checks in the controller.
 
-## Proved in a sandbox
+### Proved in a sandbox
 
 **Run on 2026-10-10 from the `1.0.0a1` release zip, with development off**, on XenForo 2.2.19
 Patch 2 with PHP 7.4.33 and on 2.3.13 with PHP 8.3. The same on both unless noted:
@@ -102,10 +126,27 @@ upgrade from `1.0.0a2` on the 2.3.13 instance. On 2.2 the same edit page and con
 were repeated over HTTP with the same results, which is the first time the four modifications were
 rendered on that line; `xf_error_log` and Mailpit stayed empty.
 
-## Not yet proved
+### Counted against other XenForo releases
 
+**Each `user_edit` modification's `find` was counted against the admin templates shipped in six
+XenForo releases, on 2026-10-11**: 2.1.15 Patch 1, 2.2.19, 2.2.19 Patch 2, 2.3.0 Patch 2, 2.3.12
+and 2.3.13. All four match exactly once in every one. No release in that set fails, so the count
+has no control: it shows the modifications match, not that the count can report one that does not.
+
+### Not yet run
 
 - Uninstall on 2.3 from the release zip.
-- The pages looked at by a person in a browser, which is the only check on how they read.
 - Archive Site installed beside it in a sandbox. On the development forum, where it is installed,
   the valid-user query carries both add-ons' conditions and `validate` gives the warning.
+
+## Needs a human
+
+**Every page check above read the HTML over HTTP. Nobody has looked at a page in a browser**, which
+is the only check on how one reads:
+
+1. The list at `api-users/`: the columns, the empty state, and the key count beside each account.
+2. The add form, and the error shown when the administrator option is refused.
+3. The *Convert to API user* confirmation, and each refusal it can give.
+4. An API user's edit page: where the notice sits, and whether the notes that replace the email
+   and password fields read as deliberate and not as a broken form.
+5. The navigation entry: that *API users* is where an administrator would look for it.

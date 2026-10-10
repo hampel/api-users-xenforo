@@ -84,6 +84,17 @@ The floor is 2.2.0 and PHP 7.4. Use short class names (`'XF:User'`, `'XF:User\Lo
 2.3-only `...Repository`/`...Service` class constant; commands extend Symfony's `Command`; no
 `strict_types`, no typed parameters on inherited methods.
 
+## `Seed/` and `Factory/` are development files, and a release leaves them out
+
+**They extend the Seeder add-on's classes, which is not a dependency and needs XenForo 2.3 and
+PHP 8.1.** Nothing loads either class until `seeder:run` names it, so they are inert on a forum
+without that add-on, 2.2 included. `build.json` removes both directories, and `PackagingTest` fails
+if it stops doing so. The suite cannot run them, for the same reason they cannot ship.
+
+**The factory builds and records the account, not this add-on's row**, through the same `Creator`
+service as the control panel. Cleaning deletes the account, which removes the row; recording the
+row would leave the account behind.
+
 ## Not done, on purpose
 
 - **No conversion of an API user back into an ordinary account.** That is the hole the guarantee

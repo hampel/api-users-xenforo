@@ -173,6 +173,25 @@ against accounts made by something other than this suite. No member in that set 
 alerted or followed anyone, so the bookkeeping list is still unchecked against an account that has
 been active without posting.
 
+### Seeding API users
+
+`Seed/ApiUserSeeder` makes API users in each state the list page shows, on a forum that has the
+Seeder add-on:
+
+```bash
+php cmd.php seeder:run Hampel/ApiUsers:ApiUser -p users=30 --batch=api-users
+php cmd.php seeder:clean api-users
+```
+
+**The run prints each key's value, and they are working credentials on that forum.**
+
+**Run and cleaned on a development forum on 2026-10-11**, XenForo 2.3.12: seven accounts and six
+keys made, two of the accounts administrators with an administrator record, two with no key and one
+with a second, inactive key; every account on the API-only scheme with no email address, dated
+across the run's span; `validate` exiting 0. After cleaning, the row counts of the user, profile,
+option, privacy, authentication, administrator, API key, key scope, change log and error log
+tables, and of this add-on's own, were each what they had been before the run.
+
 ### Not yet run
 
 - Archive Site installed beside it in a sandbox. On the development forum, where it is installed,

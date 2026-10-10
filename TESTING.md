@@ -139,6 +139,23 @@ upgrade from `1.0.0a2` on the 2.3.13 instance. On 2.2 the same edit page and con
 were repeated over HTTP with the same results, which is the first time the four modifications were
 rendered on that line; `xf_error_log` and Mailpit stayed empty.
 
+**Uninstall on 2.3, on 2026-10-11**, of `1.0.0a3` on the 2.3.13 instance, with five API users
+present, three of them administrators and one converted from a member:
+
+- every one moved to `XF:NoPassword` with empty data, and no row anywhere still named this
+  add-on's scheme;
+- the table dropped; no class extension, phrase, admin permission or permission grant, navigation
+  entry, route, listener, template or template modification left behind;
+- the forum index and the control panel login rendering, `xf_error_log` and Mailpit empty after
+  the job queue ran, and a login attempt against a surviving account answering *Incorrect
+  password*;
+- the three commands still listed, since an uninstall deletes no files, and each refused by
+  XenForo as belonging to an inactive add-on;
+- installed again from the same files: data imported by the real path, a new API user created,
+  and `validate` exiting 0. **The five earlier accounts stay as they were left**: passwordless
+  members, not API users, and `validate` does not report them, which is the rule that nothing is
+  inferred from a missing password.
+
 ### Counted against other XenForo releases
 
 **Each `user_edit` modification's `find` was counted against the admin templates shipped in six
@@ -148,7 +165,6 @@ has no control: it shows the modifications match, not that the count can report 
 
 ### Not yet run
 
-- Uninstall on 2.3 from the release zip.
 - Archive Site installed beside it in a sandbox. On the development forum, where it is installed,
   the valid-user query carries both add-ons' conditions and `validate` gives the warning.
 

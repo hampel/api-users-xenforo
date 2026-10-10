@@ -97,10 +97,13 @@ it from the `1.0.0a1` zip to `1.0.0a2` by the real import path:
   gone, scheme API-only, hidden, recorded with the note, and its old password refused at login;
 - core's edit form, posted without the hidden fields, still saves.
 
+**The `1.0.0a3` zip, on 2026-10-10**: a fresh install on 2.2.19 Patch 2 with PHP 7.4.33, and an
+upgrade from `1.0.0a2` on the 2.3.13 instance. On 2.2 the same edit page and conversion checks
+were repeated over HTTP with the same results, which is the first time the four modifications were
+rendered on that line; `xf_error_log` and Mailpit stayed empty.
+
 ## Not yet proved
 
-- **The four modifications on XenForo 2.2.** Each `find` matches the 2.2.19 `user_edit` template
-  exactly once, checked against the template text; they have not been compiled or rendered there.
 
 - Uninstall on 2.3 from the release zip.
 - The pages looked at by a person in a browser, which is the only check on how they read.

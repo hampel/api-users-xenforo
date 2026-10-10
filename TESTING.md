@@ -74,7 +74,14 @@ They create real accounts and roll them back. Two consequences:
   inside it; the profile checks.
 - `CoreAdministratorPageTest` — core's own administrator save, driven against an API user: adding
   one and editing one both leave it API-only and send no mail.
-- `AdminControllerTest` — the permission, the two extra requirements for an administrator.
+- `AdminControllerTest` — the permission, the two extra requirements for an administrator, where
+  each save redirects to, and that neither write is reachable without a CSRF token. Each refusal is
+  asserted by its message, since several of them share a response code.
+- `RenderingTest` — the three pages rendered: titles, the notes and labels each state shows, no
+  phrase left as its key and no template error. And core's user edit page with the modifications
+  applied: an API user's has the notice and neither field; a member's has both fields and the
+  convert action; an administrator without the permission is given no link into this add-on; the
+  add-user page is unchanged.
 - `HealthCheckTest`, `CommandsTest` — each drift a guard cannot prevent is reported, and the exit
   contract.
 - `SetupTest` — the first uninstall step.
@@ -83,7 +90,13 @@ They create real accounts and roll them back. Two consequences:
 
 **Each guard was switched off in turn and the suite failed every time**, on 2026-10-10: the two
 entity guards, the listing exclusion, its control panel exemption, the profile check,
-`hasPassword()`, and both administrator checks in the controller.
+`hasPassword()`, and both administrator checks in the controller. **On 2026-10-11** three more:
+the wrong-password refusal given another refusal's wording, the super administrator rule removed,
+and a phrase reference in the list template broken. Each failed the test written for it.
+
+**The convert action is asserted on the page action and not on the page body.** Core's actions
+menu is set through `<xf:pageaction>`, so a modification inside it never appears in the rendered
+template.
 
 ### Proved in a sandbox
 
@@ -141,8 +154,8 @@ has no control: it shows the modifications match, not that the count can report 
 
 ## Needs a human
 
-**Every page check above read the HTML over HTTP. Nobody has looked at a page in a browser**, which
-is the only check on how one reads:
+**Every page check above read the HTML, in the suite or over HTTP. Nobody has looked at a page in a
+browser**, which is the only check on how one reads:
 
 1. The list at `api-users/`: the columns, the empty state, and the key count beside each account.
 2. The add form, and the error shown when the administrator option is refused.

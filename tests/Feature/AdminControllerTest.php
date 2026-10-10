@@ -30,6 +30,12 @@ class AdminControllerTest extends TestCase
 		return $this->dispatch('api-users/save', 'admin', $input, [], 'POST');
 	}
 
+	/** Core's own wording, so that a test names the guard that refused and not only its code. */
+	private function corePhrase($name)
+	{
+		return \XF::phrase($name)->render('raw');
+	}
+
 	private function userIdOf($username)
 	{
 		return $this->app()->db()->fetchOne('SELECT user_id FROM xf_user WHERE username = ?', $username);
@@ -66,6 +72,8 @@ class AdminControllerTest extends TestCase
 		$reply = $this->save(['username' => $name, 'note' => 'made in the control panel']);
 
 		$this->assertReplyIsRedirect($reply);
+		$this->assertStringContainsString($this->app()->router('admin')->buildLink('api-users'), $reply->getUrl());
+		$this->assertStringContainsString($name, (string) $reply->getMessage());
 
 		$userId = $this->userIdOf($name);
 		$this->assertIsApiOnly($userId);
@@ -81,7 +89,9 @@ class AdminControllerTest extends TestCase
 		$this->admin(['hampelApiUsers']);
 		$existing = $this->createApiUser();
 
-		$this->assertReplyIsError($this->save(['username' => $existing->username]));
+		$this->assertReplyIsError(
+			$this->save(['username' => $existing->username]), null, $this->corePhrase('usernames_must_be_unique')
+		);
 	}
 
 	/** Manage API users must not be a second door to minting administrators. */
@@ -92,7 +102,7 @@ class AdminControllerTest extends TestCase
 
 		$reply = $this->save(['username' => $name, 'is_admin' => 1, 'visitor_password' => self::PASSWORD]);
 
-		$this->assertReplyIsError($reply, 403);
+		$this->assertReplyIsError($reply, 403, 'requires the Manage administrators permission');
 		$this->assertFalse($this->userIdOf($name));
 	}
 
@@ -101,8 +111,12 @@ class AdminControllerTest extends TestCase
 		$this->admin(['hampelApiUsers', 'admin']);
 		$name = $this->uniqueName('acp');
 
-		$this->assertReplyIsError($this->save(['username' => $name, 'is_admin' => 1]));
-		$this->assertReplyIsError($this->save(['username' => $name, 'is_admin' => 1, 'visitor_password' => 'wrong']));
+		$wrong = $this->corePhrase('your_existing_password_is_not_correct');
+
+		$this->assertReplyIsError($this->save(['username' => $name, 'is_admin' => 1]), null, $wrong);
+		$this->assertReplyIsError(
+			$this->save(['username' => $name, 'is_admin' => 1, 'visitor_password' => 'wrong']), null, $wrong
+		);
 		$this->assertFalse($this->userIdOf($name));
 	}
 
@@ -150,6 +164,9 @@ class AdminControllerTest extends TestCase
 		$reply = $this->dispatch('api-users/' . $member->user_id . '/convert', 'admin', ['note' => 'the old bot'], [], 'POST');
 
 		$this->assertReplyIsRedirect($reply);
+		$this->assertStringContainsString(
+			$this->app()->router('admin')->buildLink('users/edit', $member), $reply->getUrl()
+		);
 		$this->assertIsApiOnly($member->user_id);
 
 		$row = $this->app()->db()->fetchRow('SELECT * FROM xf_hampel_apiusers_user WHERE user_id = ?', $member->user_id);
@@ -166,7 +183,10 @@ class AdminControllerTest extends TestCase
 		]);
 
 		$this->assertNotEmpty($this->dispatch('api-users/' . $member->user_id . '/convert', 'admin')->getParam('blockers'));
-		$this->assertReplyIsError($this->dispatch('api-users/' . $member->user_id . '/convert', 'admin', [], [], 'POST'));
+		$this->assertReplyIsError(
+			$this->dispatch('api-users/' . $member->user_id . '/convert', 'admin', [], [], 'POST'),
+			null, 'It has been used as a member.'
+		);
 		$this->assertNotSame('', $this->app()->db()->fetchOne('SELECT email FROM xf_user WHERE user_id = ?', $member->user_id));
 	}
 
@@ -179,8 +199,29 @@ class AdminControllerTest extends TestCase
 		$record->save();
 		$this->app()->em()->clearEntityCache();
 
-		$this->assertReplyIsError($this->dispatch('api-users/' . $member->user_id . '/convert', 'admin', [], [], 'POST'));
+		$this->assertReplyIsError(
+			$this->dispatch('api-users/' . $member->user_id . '/convert', 'admin', [], [], 'POST'),
+			null, $this->corePhrase('you_must_be_super_administrator_to_edit_user')
+		);
 		$this->assertNotSame('', $this->app()->db()->fetchOne('SELECT email FROM xf_user WHERE user_id = ?', $member->user_id));
+	}
+
+	/** Both writes sit behind XenForo's own request check, which a forged form cannot pass. */
+	public function test_neither_write_is_reachable_without_a_csrf_token()
+	{
+		$this->admin(['hampelApiUsers']);
+		$member = $this->createMember();
+		$name = $this->uniqueName('acp');
+
+		$this->assertReplyIsError($this->dispatchWithoutCsrfToken('api-users/save', 'admin', ['username' => $name]));
+		$this->assertFalse($this->userIdOf($name));
+
+		$this->assertReplyIsError($this->dispatchWithoutCsrfToken('api-users/' . $member->user_id . '/convert', 'admin'));
+		$this->assertNotSame('', $this->app()->db()->fetchOne('SELECT email FROM xf_user WHERE user_id = ?', $member->user_id));
+
+		// and with one, the same two requests go through
+		$this->assertReplyIsRedirect($this->save(['username' => $name]));
+		$this->assertReplyIsRedirect($this->dispatch('api-users/' . $member->user_id . '/convert', 'admin', [], [], 'POST'));
 	}
 
 	public function test_the_add_form_offers_the_administrator_option_only_to_those_who_may_use_it()

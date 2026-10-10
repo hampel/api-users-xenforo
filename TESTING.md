@@ -163,6 +163,16 @@ XenForo releases, on 2026-10-11**: 2.1.15 Patch 1, 2.2.19, 2.2.19 Patch 2, 2.3.0
 and 2.3.13. All four match exactly once in every one. No release in that set fails, so the count
 has no control: it shows the modifications match, not that the count can report one that does not.
 
+### Asked of generated members
+
+**The converter was asked what it would refuse for 2,003 generated members on a development
+forum, on 2026-10-11**, converting none of them. Of 2,000 that had never posted, 1,598 were
+convertible, 400 refused as not in the valid state and 2 as moderators. All 3 that had started
+threads were refused as used, naming `xf_post` and `xf_thread`. That is the classification checked
+against accounts made by something other than this suite. No member in that set had logged in, been
+alerted or followed anyone, so the bookkeeping list is still unchecked against an account that has
+been active without posting.
+
 ### Not yet run
 
 - Archive Site installed beside it in a sandbox. On the development forum, where it is installed,

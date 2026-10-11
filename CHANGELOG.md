@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.0 Beta 2 (2026-10-11)
+
+- The add-on's entry in the control panel links to its discussion thread, its resource page and
+  its repository. Nothing else has changed; there is no need to upgrade from Beta 1 for this.
+
 ## 1.0.0 Beta 1 (2026-10-11)
 
 First public release.

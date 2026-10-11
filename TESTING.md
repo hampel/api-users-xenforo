@@ -192,10 +192,27 @@ across the run's span; `validate` exiting 0. After cleaning, the row counts of t
 option, privacy, authentication, administrator, API key, key scope, change log and error log
 tables, and of this add-on's own, were each what they had been before the run.
 
-### Not yet run
+### Beside Archive Site
 
-- Archive Site installed beside it in a sandbox. On the development forum, where it is installed,
-  the valid-user query carries both add-ons' conditions and `validate` gives the warning.
+**Run on 2026-10-11 in a sandbox on XenForo 2.3.13 with PHP 8.3, development off**, with this
+add-on's `1.0.0a4` build and Archive Site 2.2.2 both installed from their release files, four
+members with passwords, three API users and one API key naming an API user:
+
+- **Installed together**: both import by the real path, the forum and the control panel render,
+  and the error log is empty. The valid-user query carries both add-ons' conditions at once:
+  Archive Site's widened state test, and this add-on's exclusion after it.
+- **Unprotected**: `api-users:validate` warns, naming all three, and exits 2 under `--strict`.
+  An archive of every account archives the four members, then stops at the first API user with
+  *An API user cannot be given a password* and exits 1. No API user is changed, the key still
+  answers `api/me`, and nothing is written to the error log.
+- **Restored**: every member returns to its state and scheme, and the API users are untouched.
+- **Protected**, with the three ids in `$config['archiveSite']['protectedUsers']`: `validate`
+  reports them protected, Archive Site's own validate counts them, and the archive run completes
+  and exits 0. Afterwards the members are disabled and refused at login with Archive Site's
+  message; each API user is still valid, on the API-only scheme and recorded; the key still
+  answers as its account, and is refused a password and an email address; an API user's profile is
+  a 403 and the member list names none of them; a restore leaves them alone again.
+- **The error log and Mailpit were empty at the end.**
 
 ## Needs a human
 

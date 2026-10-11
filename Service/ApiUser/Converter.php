@@ -18,10 +18,16 @@ class Converter extends AbstractService
 	 * account that has only ever been created and logged in to has rows in several of them.
 	 * Anything in the map that is not listed here counts as content - including a table from an
 	 * add-on this list has never heard of, so that the unknown case refuses.
+	 *
+	 * The two conversation tables listed are the ones that say an account *holds* a conversation.
+	 * One it started is in xf_conversation_master and a message it wrote in
+	 * xf_conversation_message, and neither of those is here. So an account that has only been sent
+	 * a conversation - the welcome message a forum sends on registration, above all - is not
+	 * refused, and one that has answered it is.
 	 */
 	const NOT_CONTENT = [
 		'xf_admin_log', 'xf_ban_email', 'xf_bookmark_item', 'xf_bookmark_label',
-		'xf_cookie_consent_log', 'xf_deletion_log', 'xf_error_log', 'xf_feed', 'xf_forum',
+		'xf_conversation_recipient', 'xf_conversation_user', 'xf_cookie_consent_log', 'xf_deletion_log', 'xf_error_log', 'xf_feed', 'xf_forum',
 		'xf_forum_watch', 'xf_ip', 'xf_ip_match', 'xf_moderator_log', 'xf_news_feed',
 		'xf_purchase_request', 'xf_report', 'xf_spam_cleaner_log', 'xf_spam_trigger_log',
 		'xf_thread_user_post', 'xf_thread_watch', 'xf_user_alert', 'xf_user_ban', 'xf_user_follow',

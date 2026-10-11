@@ -75,6 +75,10 @@ XenForo itself would reassign when merging or deleting a user — posts, convers
 attachments, media, resources and whatever an installed add-on registers — and not bookkeeping
 such as login records or alerts.
 
+**A conversation the account was only sent does not count**, so an account that received the
+forum's welcome message and never answered it can be converted. It keeps the conversation. One it
+started, or wrote a message in, is content.
+
 ### Then give it a key
 
 An API user can do nothing until an API key names it. Under *Setup > API keys*, add a key of type

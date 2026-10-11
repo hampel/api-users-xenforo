@@ -137,22 +137,52 @@ class ConverterTest extends TestCase
 		$this->assertStringContainsString('xf_poll_vote', $this->blockerText($member));
 	}
 
-	public function test_an_account_with_a_conversation_or_a_reaction_is_refused()
+	public function test_an_account_with_a_reaction_is_refused()
 	{
 		$member = $this->createMember();
-		$db = $this->app()->db();
 
-		$db->insert('xf_conversation_recipient', [
-			'conversation_id' => 2147480000, 'user_id' => $member->user_id, 'recipient_state' => 'active', 'last_read_date' => 0,
-		]);
-		$this->assertStringContainsString('xf_conversation_recipient', $this->blockerText($member));
-
-		$db->delete('xf_conversation_recipient', 'user_id = ?', $member->user_id);
-		$db->insert('xf_reaction_content', [
+		$this->app()->db()->insert('xf_reaction_content', [
 			'reaction_id' => 1, 'content_type' => 'post', 'content_id' => 2147480000,
 			'reaction_user_id' => $member->user_id, 'reaction_date' => 1, 'content_user_id' => 0, 'is_counted' => 0,
 		]);
+
 		$this->assertStringContainsString('xf_reaction_content', $this->blockerText($member));
+	}
+
+	/**
+	 * A forum's welcome message is a conversation sent to every account that registers. Holding
+	 * one is not having been used; starting one or answering one is.
+	 */
+	public function test_being_sent_a_conversation_is_not_content_and_writing_in_one_is()
+	{
+		$sender = $this->createMember();
+		$recipient = $this->createMember();
+
+		/** @var \XF\Service\Conversation\Creator $creator */
+		$creator = $this->app()->service('XF:Conversation\Creator', $sender);
+		$creator->setIsAutomated();
+		$creator->setOptions(['open_invite' => false, 'conversation_open' => true]);
+		$creator->setRecipientsTrusted($recipient);
+		$creator->setContent('Welcome', 'Welcome to the forum.');
+		$this->assertTrue($creator->validate($errors), json_encode($errors));
+		$conversation = $creator->save();
+
+		// the recipient really does hold it, in both of the tables that say so
+		$db = $this->app()->db();
+		$this->assertEquals(1, $db->fetchOne('SELECT COUNT(*) FROM xf_conversation_recipient WHERE user_id = ?', $recipient->user_id));
+		$this->assertEquals(1, $db->fetchOne('SELECT COUNT(*) FROM xf_conversation_user WHERE owner_user_id = ?', $recipient->user_id));
+
+		$this->assertSame([], $this->converter($recipient)->getBlockers());
+		$this->assertStringContainsString('xf_conversation_master', $this->blockerText($sender));
+
+		/** @var \XF\Service\Conversation\Replier $replier */
+		$replier = $this->app()->service('XF:Conversation\Replier', $conversation, $recipient);
+		$replier->setIsAutomated();
+		$replier->setMessageContent('Thank you.');
+		$this->assertTrue($replier->validate($errors), json_encode($errors));
+		$replier->save();
+
+		$this->assertStringContainsString('xf_conversation_message', $this->blockerText($recipient));
 	}
 
 	/** Logging in, being alerted and being renamed are not content. */

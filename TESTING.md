@@ -177,8 +177,9 @@ been active without posting.
 the six who had written a message were refused, naming the conversation tables, and the two in no
 conversation were convertible. One of those two was then sent a conversation the way XenForo's
 welcome message is, as its only recipient and without reading or answering it. **It was refused
-too**, naming `xf_conversation_recipient` and `xf_conversation_user`: having received a
-conversation counts as having been used.
+too**, naming `xf_conversation_recipient` and `xf_conversation_user`. That was changed the same day:
+those two tables no longer count, and `ConverterTest` holds both halves with a conversation made by
+XenForo's own services.
 
 ### Seeding API users
 

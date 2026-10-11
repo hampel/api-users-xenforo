@@ -63,6 +63,11 @@ have rows in. **A table not on that list counts as content, including one from a
 here has heard of** — the unknown case refuses, which is the safe direction for something that
 cannot be undone.
 
+**Holding a conversation is on that list, by decision on 2026-10-11.** `xf_conversation_recipient`
+and `xf_conversation_user` say an account was sent a conversation, which a forum's welcome message
+does to every account that registers; refusing those refused every normally registered account.
+Starting a conversation and writing a message are in two other tables and still refuse.
+
 ## The user edit page is changed by four template modifications, and only for display
 
 A notice, the *Convert to API user* action, and the email and password fields replaced by a note.

@@ -257,12 +257,15 @@ members with passwords, three API users and one API key naming an API user:
 
 ## Needs a human
 
-**Every page check above read the HTML, in the suite or over HTTP. Nobody has looked at a page in a
-browser**, which is the only check on how one reads:
+**How the pages read can only be judged in a browser.** Looked at by the author on 2026-10-11, on
+XenForo 2.3.13, and found right:
 
 1. The list at `api-users/`: the columns, the empty state, and the key count beside each account.
 2. The add form, and the error shown when the administrator option is refused.
 3. The *Convert to API user* confirmation, and each refusal it can give.
-4. An API user's edit page: where the notice sits, and whether the notes that replace the email
-   and password fields read as deliberate and not as a broken form.
+4. An API user's edit page: where the notice sits, that the notes replacing the email and
+   password fields read as deliberate, and that its actions menu has no *Merge with user*.
 5. The navigation entry: that *API users* is where an administrator would look for it.
+
+**Not looked at on XenForo 2.2**, where the control panel's markup differs. Look again after any
+change to a template or a modification.

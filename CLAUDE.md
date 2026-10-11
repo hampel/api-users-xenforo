@@ -124,6 +124,10 @@ row would leave the account behind.
 
 - **No conversion of an API user back into an ordinary account.** That is the hole the guarantee
   exists to close.
+- **An API user can still be mentioned by its exact name.** XenForo's mention lookup reads the
+  user table with no filter, so `@` and the name becomes a link to a profile that refuses the
+  reader. Nothing suggests the name. Left as it is by decision on 2026-10-11; read from core's
+  source, not tested.
 - **No `api-users:convert` command.** Conversion is offered on the user edit page only.
 - **No granting of admin permissions from the CLI, and no minting of an API key.** Both are
   additive later; core's pages do them today.

@@ -183,6 +183,16 @@ present, three of them administrators and one converted from a member:
   their notes; the upgraded copy holds no file the zip does not; `validate` exits 0; and the
   merge and follow refusals, new in this build, are in force.
 
+**The `1.0.0b2` zip, on 2026-10-11**, in one sandbox with development off. It differs from
+`1.0.0b1` in `addon.json`, which gained its links, and in the README and changelog; no code,
+template or phrase changed, so only the upgrade was run:
+
+- **An upgrade from the `1.0.0b1` zip on XenForo 2.3.13 with PHP 8.3**, by the real import path,
+  with the job queue run afterwards. The two API users made before the upgrade, one of them an
+  administrator, are still API users with their notes; the installed `addon.json` carries the
+  three links; `validate` exits 0; the forum and the control panel answer; and the error log is
+  empty. It was not installed fresh, not run on 2.2, and not uninstalled.
+
 ### Counted against other XenForo releases
 
 **Each `user_edit` modification's `find` was counted against the admin templates shipped in eight

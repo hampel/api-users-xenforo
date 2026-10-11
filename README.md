@@ -7,6 +7,9 @@ its own account, without that account also being a way into the forum.
 
 By [Simon Hampel](https://xenforo.com/community/members/sim.4264/).
 
+- [Add-on: API Users](https://xenforo.com/community/resources/api-users.10893/)
+- [Discussion and support: API Users](https://xenforo.com/community/threads/api-users.240659/)
+
 ## Requirements
 
 - XenForo 2.2.0 or later

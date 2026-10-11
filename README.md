@@ -127,6 +127,11 @@ $config['archiveSite'] = [
 
 `api-users:validate` warns about any API user that is not protected.
 
+**If a run has already stopped at an API user**, add the account to the list and then run
+`archive:archive-all-users` again from the start. Do not resume the stopped run, from the command
+line or from the control panel's notice about rebuild jobs awaiting completion: a resumed run can
+carry the protected list it began with.
+
 ## Uninstalling
 
 Uninstalling moves every API user to XenForo's own passwordless scheme and removes the table. The

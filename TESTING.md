@@ -164,6 +164,25 @@ present, three of them administrators and one converted from a member:
   members, not API users, and `validate` does not report them, which is the rule that nothing is
   inferred from a missing password.
 
+**The `1.0.0b1` zip, on 2026-10-11**, in two sandboxes with development off:
+
+- **A fresh install on XenForo 2.2.0 Patch 2 with PHP 7.4.33, the declared floor.** Every PHP file
+  lints. The install imports from `_data`; all five extensions and all five modifications apply.
+  The three commands run with the exit codes of the contract. Driven by a script through
+  XenForo's own entities and services: a password and an email address are refused, login is
+  refused, a member cannot view an API user's profile or follow it, a member sent a welcome
+  conversation and holding a connected account and follows converts and loses all three, a member
+  who started a conversation is refused, and a merge is refused in each direction while two
+  members still merge. Logged in to the control panel over HTTP: the list, the add form, both
+  convert pages, the merge form's refusal, and the edit pages of an API user and of a member, each
+  showing what the 2.3 pages show. As a guest the profile is a 403 and the member list names no
+  API user. Then uninstalled: nothing left behind, the accounts on `XF:NoPassword`, the forum
+  rendering. The error log held only the two merge refusals, and Mailpit nothing.
+- **An upgrade from `1.0.0a3` on XenForo 2.3.13 with PHP 8.3**, by the real import path, with the
+  job queue run afterwards. The two API users made before the upgrade are still API users with
+  their notes; the upgraded copy holds no file the zip does not; `validate` exits 0; and the
+  merge and follow refusals, new in this build, are in force.
+
 ### Counted against other XenForo releases
 
 **Each `user_edit` modification's `find` was counted against the admin templates shipped in eight

@@ -1,4 +1,7 @@
 {
+    "XF-Admin-Controller-User_Hampel-ApiUsers-XF-Admin-Controller-User.json": {
+        "hash": "bd6249a369bdd1f9f9768726d7b64aa6"
+    },
     "XF-Entity-UserAuth_Hampel-ApiUsers-XF-Entity-UserAuth.json": {
         "hash": "10b296c3b3ff2f35d69ca6f947f418ed"
     },
@@ -7,5 +10,8 @@
     },
     "XF-Finder-User_Hampel-ApiUsers-XF-Finder-User.json": {
         "hash": "8c686c3ca88915d754ec6bf91566ab07"
+    },
+    "XF-Service-User-Merge_Hampel-ApiUsers-XF-Service-User-Merge.json": {
+        "hash": "f0fc946bff653cb2e5d39cc01f10709b"
     }
 }

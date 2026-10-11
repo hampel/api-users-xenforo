@@ -110,13 +110,18 @@ class HealthCheck extends AbstractService
 			$missing[] = 'XF\Finder\User';
 		}
 
+		if (!($this->service('XF:User\Merge') instanceof \Hampel\ApiUsers\XF\Service\User\Merge))
+		{
+			$missing[] = 'XF\Service\User\Merge';
+		}
+
 		if ($missing)
 		{
 			return [static::PROBLEM, 'Not applied: ' . implode(', ', $missing)
-				. '. An API user can be given a password or an email address, or is listed as a member.'];
+				. '. An API user can be given a password or an email address, is listed as a member, or can be merged.'];
 		}
 
-		return [static::OK, 'The password guard, the email guard and the member listing filter are applied.'];
+		return [static::OK, 'The password guard, the email guard, the member listing filter and the merge refusal are applied.'];
 	}
 
 	/**

@@ -75,9 +75,22 @@ and `xf_conversation_user` say an account was sent a conversation, which a forum
 does to every account that registers; refusing those refused every normally registered account.
 Starting a conversation and writing a message are in two other tables and still refuse.
 
-## The user edit page is changed by four template modifications, and only for display
+## An API user is never merged, and the service is where that is enforced
 
-A notice, the *Convert to API user* action, and the email and password fields replaced by a note.
+**Decided by Simon on 2026-10-11: not as the source and not as the target.** As the source it
+would be deleted and its API keys handed to the other account; as the target it would take on a
+member's content.
+
+`XF\Service\User\Merge::merge()` is extended, because every merge ends there whatever queued it.
+**It reports the merge as completed, having done nothing, and logs an error** — it does not throw.
+Core runs a merge as a job, and a job that throws is not finished; one that completes is. The
+admin controller's `actionMerge()` is extended only to give an administrator the reason before a
+job is queued. Both are registered against the 2.2 class names, by hand, as the finder is.
+
+## The user edit page is changed by five template modifications, and only for display
+
+A notice, the *Convert to API user* action, the email and password fields replaced by a note, and
+*Merge with user* left out of an API user's actions menu.
 **None of them is the enforcement** — the entity guards are, and they hold with every modification
 disabled. Core's save reads an absent email field as empty and an absent password choice as
 no change, which is why hiding the fields is safe. The email and password modifications are

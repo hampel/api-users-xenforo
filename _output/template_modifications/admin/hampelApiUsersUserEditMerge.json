@@ -1,0 +1,9 @@
+{
+    "template": "user_edit",
+    "description": "Leave Merge with user out of the actions menu of an API user",
+    "execution_order": 10,
+    "enabled": true,
+    "action": "str_replace",
+    "find": "<a href=\"{{ link('users/merge', $user) }}\" class=\"menu-linkRow\" data-xf-click=\"overlay\">{{ phrase('merge_with_user') }}</a>",
+    "replace": "<xf:if is=\"!$user.ApiUser\">\n\t\t\t\t\t\t$0\n\t\t\t\t\t</xf:if>"
+}

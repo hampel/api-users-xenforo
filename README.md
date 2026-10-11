@@ -119,6 +119,9 @@ writes nor sends.
 - **A disabled add-on does not guard.** While it is disabled an API user still cannot log in, but
   the user edit form can give it a password. Run `api-users:validate` after enabling it again.
 - **An API user cannot be converted back** into an ordinary account. Delete it and create a new one.
+- **An API user cannot be merged**, into another account or with another account merged into it.
+  The user edit page does not offer it, and a merge asked for any other way is refused and
+  recorded in the server error log.
 
 ## With Archive Site
 

@@ -5,6 +5,9 @@
     "admin/hampelApiUsersUserEditEmail.json": {
         "hash": "f34e6f83ce44bd954f3cbb9c1ad7c24f"
     },
+    "admin/hampelApiUsersUserEditMerge.json": {
+        "hash": "7f32e786a8d75507930c92c4ca71fe27"
+    },
     "admin/hampelApiUsersUserEditNotice.json": {
         "hash": "f5cbd945772b762679e1985255eb6c7c"
     },

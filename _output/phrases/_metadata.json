@@ -17,6 +17,12 @@
         "version_string": "1.0.0a1",
         "hash": "f216c6fb803422aeddcf199b65ed2bd2"
     },
+    "hampel_apiusers_api_user_cannot_be_merged.txt": {
+        "global_cache": false,
+        "version_id": 1000014,
+        "version_string": "1.0.0a4",
+        "hash": "1f70f1123db2d14cbe4469d30040f7ce"
+    },
     "hampel_apiusers_api_user_cannot_have_email_address.txt": {
         "global_cache": false,
         "version_id": 1000011,

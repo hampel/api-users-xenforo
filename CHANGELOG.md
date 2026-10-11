@@ -10,5 +10,6 @@
 - Converting an account removes it from other members' following and followers lists, where it was
   still named in public. An API user can no longer follow or be followed, and `api-users:validate`
   reports one that is.
+- An API user cannot be merged with another account, in either direction.
 - Converting an account is no longer refused because it was sent a conversation it never answered,
   such as a forum's welcome message.

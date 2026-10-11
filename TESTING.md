@@ -12,11 +12,13 @@ checked. For whoever changes it next.
 | class extension | `XF\Entity\User` — the `ApiUser` relation, the email guard, the profile and follow checks |
 | class extension | `XF\Entity\UserAuth` — the password guard |
 | class extension | `XF\Finder\User` — `isValidUser()`, at `execute_order` 20 |
+| class extension | `XF\Service\User\Merge` — refuses a merge that involves an API user |
+| class extension | `XF\Admin\Controller\User` — the merge form's refusal, with its reason |
 | admin route | `api-users/` → `Admin\Controller\ApiUser` |
 | admin permission | `hampelApiUsers` |
 | admin navigation | `hampelApiUsers`, under `serviceProviders` |
 | templates | admin `hampel_apiusers_list`, `hampel_apiusers_add`, `hampel_apiusers_convert` |
-| template modification | admin `user_edit` × 4 — notice, convert action, email field, password field |
+| template modification | admin `user_edit` × 5 — notice, convert action, email field, password field, merge action |
 | CLI command | `api-users:create`, `api-users:list`, `api-users:validate` |
 | code event listener | `hampel_admin_api_redaction` → `Listener::adminApiRedaction` |
 | config key read | another add-on's: `archiveSite.protectedUsers`, `archiveSiteProtectedUsers` |
@@ -28,7 +30,7 @@ No options, cron entries, jobs or public templates.
 - **An extension that replaces `isValidUser()` without calling its parent discards the exclusion.**
   This add-on registers at `execute_order` 20 to sit outside most others, which does not help
   against one registered higher. `api-users:validate` reads the built query, so it reports this.
-- **The four `user_edit` modifications stop applying when core rewords that template.** The
+- **The five `user_edit` modifications stop applying when core rewords that template.** The
   upgrade succeeds and the notice, the convert action and the two notes vanish. Nothing is
   unguarded when they do: the entity guards refuse a password and an email address with every
   modification disabled. `validate` warns for each one that no longer matches.
@@ -60,6 +62,9 @@ They create real accounts and roll them back. Two consequences:
 - **Touch shared tables by primary key only.** `xf_user_authenticate.scheme_class` has no index, so
   an update or delete by it scans the table and waits on every row another add-on's suite has
   locked. That hung a run here until the statement was rewritten.
+- **Feature tests can fail with a deadlock when another suite is using the same forum.** Each
+  test creates accounts, and two suites doing so at once deadlock on `xf_user_group_relation`. Run
+  again when the other has finished; a real failure is not a `DeadlockException`.
 - **Nothing that runs DDL can be tested this way**: it commits the transaction. The second
   uninstall step is proved in a sandbox instead.
 
@@ -85,6 +90,9 @@ They create real accounts and roll them back. Two consequences:
 - `HealthCheckTest`, `CommandsTest` — each drift a guard cannot prevent is reported, and the exit
   contract.
 - `SetupTest` — the first uninstall step.
+- `MergeTest` — an API user is merged neither into a member nor with a member into it, by the
+  service or through the control panel's form, which gives the reason and queues nothing; two
+  ordinary members still merge both ways.
 - `ConverterTest` — what conversion removes and keeps, each refusal, and that a table an add-on
   registers counts as content.
 
@@ -158,9 +166,13 @@ present, three of them administrators and one converted from a member:
 
 ### Counted against other XenForo releases
 
-**Each `user_edit` modification's `find` was counted against the admin templates shipped in six
-XenForo releases, on 2026-10-11**: 2.1.15 Patch 1, 2.2.19, 2.2.19 Patch 2, 2.3.0 Patch 2, 2.3.12
-and 2.3.13. All four match exactly once in every one. No release in that set fails, so the count
+**Each `user_edit` modification's `find` was counted against the admin templates shipped in eight
+XenForo releases, on 2026-10-11**: 2.1.0, 2.1.15 Patch 1, 2.2.0 Patch 2, 2.2.19, 2.2.19 Patch 2,
+2.3.0 Patch 2, 2.3.12 and 2.3.13. All five match exactly once in every one. The same pass read
+each release's source for the core methods the extensions call: the merge service and its
+continuation result, `canFollowUser()`, `isFollowing()` and `canBypassUserPrivacy()` are in all
+eight. **2.2.0 Patch 2 is the declared floor**, so this is the nearest thing to a test of it short
+of an install. No release in that set fails, so the count
 has no control: it shows the modifications match, not that the count can report one that does not.
 
 ### Asked of generated members

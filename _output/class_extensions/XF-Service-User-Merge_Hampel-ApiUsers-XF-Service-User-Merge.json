@@ -1,0 +1,6 @@
+{
+    "from_class": "XF\\Service\\User\\Merge",
+    "to_class": "Hampel\\ApiUsers\\XF\\Service\\User\\Merge",
+    "execute_order": 10,
+    "active": true
+}

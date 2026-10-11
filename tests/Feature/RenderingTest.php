@@ -140,12 +140,13 @@ class RenderingTest extends TestCase
 		$this->assertNoTemplateErrors(self::TEMPLATES);
 	}
 
-	public function test_all_four_edit_page_modifications_are_applied()
+	public function test_all_five_edit_page_modifications_are_applied()
 	{
 		$this->assertTemplateModificationApplied('hampelApiUsersUserEditNotice');
 		$this->assertTemplateModificationApplied('hampelApiUsersUserEditConvert');
 		$this->assertTemplateModificationApplied('hampelApiUsersUserEditEmail');
 		$this->assertTemplateModificationApplied('hampelApiUsersUserEditPassword');
+		$this->assertTemplateModificationApplied('hampelApiUsersUserEditMerge');
 	}
 
 	public function test_an_api_user_edit_page_carries_the_notice_and_no_email_or_password_field()
@@ -160,8 +161,9 @@ class RenderingTest extends TestCase
 		$this->assertSame(2, substr_count($html, self::NONE), 'one note for the email field and one for the password');
 		$this->assertDontSee($html, self::EMAIL_INPUT, false);
 		$this->assertDontSee($html, self::PASSWORD_CHOICE, false);
-		$this->assertSee($actions, 'Merge with user');
+		$this->assertSee($actions, 'Manage watched threads');
 		$this->assertDontSee($actions, self::CONVERT);
+		$this->assertDontSee($actions, 'Merge with user');
 		$this->assertNoUnresolvedPhrases($html, self::PHRASES);
 	}
 
@@ -176,6 +178,7 @@ class RenderingTest extends TestCase
 		$this->assertSee($html, self::EMAIL_INPUT, false);
 		$this->assertSee($html, self::PASSWORD_CHOICE, false);
 		$this->assertSee($actions, self::CONVERT);
+		$this->assertSee($actions, 'Merge with user');
 		$this->assertSee($actions, $this->app()->router('admin')->buildLink('api-users/convert', $member));
 		$this->assertNoUnresolvedPhrases($actions, self::PHRASES);
 		$this->assertDontSee($html, self::NOTICE);

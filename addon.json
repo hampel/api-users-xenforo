@@ -9,7 +9,8 @@
     "faq_url": "",
     "support_url": "https://xenforo.com/community/threads/api-users.240659/",
     "extra_urls": {
-        "Addon": "https://xenforo.com/community/resources/api-users.10893/"
+        "Addon": "https://xenforo.com/community/resources/api-users.10893/",
+        "Git Repository": "https://github.com/hampel/api-users-xenforo"
     },
     "require": {
         "php": [

@@ -173,6 +173,13 @@ against accounts made by something other than this suite. No member in that set 
 alerted or followed anyone, so the bookkeeping list is still unchecked against an account that has
 been active without posting.
 
+**And for members in generated conversations, in a sandbox on the same date.** Of eight members,
+the six who had written a message were refused, naming the conversation tables, and the two in no
+conversation were convertible. One of those two was then sent a conversation the way XenForo's
+welcome message is, as its only recipient and without reading or answering it. **It was refused
+too**, naming `xf_conversation_recipient` and `xf_conversation_user`: having received a
+conversation counts as having been used.
+
 ### Seeding API users
 
 `Seed/ApiUserSeeder` makes API users in each state the list page shows, on a forum that has the

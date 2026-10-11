@@ -94,6 +94,34 @@ class ConverterTest extends TestCase
 		$this->assertNotEquals($before, $db->fetchOne('SELECT password_date FROM xf_user_profile WHERE user_id = ?', $userId));
 	}
 
+	/** A follow names both accounts on each other's public profile, where no listing filter reaches. */
+	public function test_following_and_being_followed_are_both_removed()
+	{
+		$member = $this->createMember();
+		$other = $this->createMember();
+		$em = $this->app()->em();
+
+		foreach ([[$member, $other], [$other, $member]] AS [$from, $to])
+		{
+			$follow = $em->create('XF:UserFollow');
+			$follow->bulkSet(['user_id' => $from->user_id, 'follow_user_id' => $to->user_id]);
+			$follow->save();
+		}
+
+		$db = $this->app()->db();
+		$following = 'SELECT following FROM xf_user_profile WHERE user_id = ?';
+		$this->assertSame((string) $member->user_id, (string) $db->fetchOne($following, $other->user_id));
+
+		$this->converter($this->reload($member->user_id))->convert();
+
+		$this->assertEquals(0, $db->fetchOne(
+			'SELECT COUNT(*) FROM xf_user_follow WHERE user_id = ? OR follow_user_id = ?', [$member->user_id, $member->user_id]
+		));
+
+		// and the other member's own cached list, which is what its profile page reads
+		$this->assertSame('', (string) $db->fetchOne($following, $other->user_id));
+	}
+
 	public function test_its_api_keys_are_kept()
 	{
 		$member = $this->createMember();

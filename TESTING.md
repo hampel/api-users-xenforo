@@ -9,7 +9,7 @@ checked. For whoever changes it next.
 |---|---|
 | authentication scheme | `Hampel\ApiUsers:ApiOnly` → `Authentication\ApiOnly` |
 | table | `xf_hampel_apiusers_user` — one row per API user |
-| class extension | `XF\Entity\User` — the `ApiUser` relation, the email guard, the profile checks |
+| class extension | `XF\Entity\User` — the `ApiUser` relation, the email guard, the profile and follow checks |
 | class extension | `XF\Entity\UserAuth` — the password guard |
 | class extension | `XF\Finder\User` — `isValidUser()`, at `execute_order` 20 |
 | admin route | `api-users/` → `Admin\Controller\ApiUser` |
@@ -180,6 +180,20 @@ welcome message is, as its only recipient and without reading or answering it. *
 too**, naming `xf_conversation_recipient` and `xf_conversation_user`. That was changed the same day:
 those two tables no longer count, and `ConverterTest` holds both halves with a conversation made by
 XenForo's own services.
+
+**And for members with another way in, or active without content, in the same sandbox.** Nine
+generated members: one each with a connected account, two-step verification, a passkey, a saved
+login and a pending email confirmation, and two that had logged in, been alerted, followed a
+member and been followed back, with the two members they followed. The one awaiting confirmation
+was refused as not valid. The other eight were convertible and were converted: every connected
+account, two-step, passkey and saved login row was gone afterwards, and the login, alert and
+who's-online rows of the active ones did not count as content. That is the first check of the
+removal against rows written the way XenForo writes them.
+
+**It found a leak.** The follows survived conversion, and a converted account was named on the
+*About*, *Following* and *Followers* pages of the member it followed, as a guest. Conversion now
+removes them, a new one is refused, and `validate` warns of any, which it did for the four
+accounts converted before the change.
 
 ### Seeding API users
 

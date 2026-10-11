@@ -55,6 +55,13 @@ confirmations and OAuth tokens before it sets the scheme, and changes `password_
 sessions are dropped. `HealthCheck::checkOtherLogins()` reports an API user that has acquired
 one since.
 
+**It removes follows in both directions as well, which is about hiding and not about logging in.**
+A member's *Following* and *Followers* lists are read from `xf_user_follow` and a cache on the
+profile, and neither goes through `isValidUser()`. Found on 2026-10-11 by converting a generated
+member that followed another: the API user was named on the other member's public profile.
+`canFollowUser()` refuses a new follow either way round, and defers to core when the follow
+already exists, because core uses the same check to allow removing it.
+
 **What counts as content is core's own map, minus a list of bookkeeping tables.** The map is the
 `$updates` property of `XF:User\ContentChange`, the service core uses to rename, merge and delete a
 user, extended by add-ons through `user_content_change_init`. Core offers no getter, so it is read

@@ -12,6 +12,21 @@ class User extends XFCP_User
 		return $this->user_id && (bool) $this->ApiUser;
 	}
 
+	/**
+	 * Nobody new follows an API user and an API user follows nobody: a follow puts its name on
+	 * the other member's public profile. Left to core when the follow already exists, since the
+	 * same check guards removing it.
+	 */
+	public function canFollowUser(\XF\Entity\User $user)
+	{
+		if (($this->isApiUser() || $user->isApiUser()) && !$this->isFollowing($user))
+		{
+			return false;
+		}
+
+		return parent::canFollowUser($user);
+	}
+
 	public function canViewFullProfile(&$error = null)
 	{
 		if (!$this->canViewApiUserProfile($error))

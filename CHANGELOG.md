@@ -7,5 +7,8 @@
   list them, and `api-users:validate`.
 - The user edit page marks an API user, replaces its email and password fields with a note, and
   offers *Convert to API user* for an account that has never been used as a member.
+- Converting an account removes it from other members' following and followers lists, where it was
+  still named in public. An API user can no longer follow or be followed, and `api-users:validate`
+  reports one that is.
 - Converting an account is no longer refused because it was sent a conversation it never answered,
   such as a forum's welcome message.

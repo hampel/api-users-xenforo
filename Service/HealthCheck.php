@@ -38,6 +38,7 @@ class HealthCheck extends AbstractService
 		'scheme' => ['API users', 'No password', 'checkScheme'],
 		'unrecorded' => ['API users', 'Unrecorded accounts', 'checkUnrecorded'],
 		'logins' => ['API users', 'No other way in', 'checkOtherLogins'],
+		'follows' => ['API users', 'No follows', 'checkFollows'],
 		'email' => ['API users', 'No email address', 'checkEmail'],
 		'state' => ['API users', 'Able to act', 'checkState'],
 		'admins' => ['API users', 'Administrators', 'checkAdmins'],
@@ -275,6 +276,30 @@ class HealthCheck extends AbstractService
 		}
 
 		return [static::OK, 'No API user has a connected account or a passkey.'];
+	}
+
+	/**
+	 * A follow names both accounts on each other's public profile. Converting removes them and
+	 * nothing new can be made through XenForo, so one here was written some other way.
+	 */
+	public function checkFollows()
+	{
+		$names = $this->db()->fetchAllColumn('
+			SELECT DISTINCT user.username
+			FROM ' . static::TABLE . ' AS api_user
+			INNER JOIN xf_user AS user ON (user.user_id = api_user.user_id)
+			INNER JOIN xf_user_follow AS follow
+				ON (follow.user_id = api_user.user_id OR follow.follow_user_id = api_user.user_id)
+			ORDER BY user.username
+		');
+
+		if ($names)
+		{
+			return [static::WARNING, 'Follows a member or is followed by one, which names it on that member\'s public profile: '
+				. implode(', ', $names) . '.'];
+		}
+
+		return [static::OK, 'No API user follows a member or is followed by one.'];
 	}
 
 	public function checkEmail()

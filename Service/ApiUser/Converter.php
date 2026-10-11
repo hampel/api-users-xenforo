@@ -210,6 +210,7 @@ class Converter extends AbstractService
 		// Every other way in goes before the password does. A connected account logs its user in
 		// whatever the authentication scheme says, so leaving one would leave a working login.
 		$this->removeOtherLogins();
+		$this->removeFollows();
 
 		$this->repository('Hampel\ApiUsers:ApiUser')->applyApiUserShape($user);
 
@@ -272,6 +273,25 @@ class Converter extends AbstractService
 			}
 
 			$db->delete('xf_oauth_token', 'user_id = ?', $userId);
+		}
+	}
+
+	/**
+	 * Following and being followed both put this account's name on another member's public
+	 * profile, where the listing filter does not reach. Each row goes through its entity, which
+	 * rebuilds the cached list on the profile of whoever was following.
+	 */
+	protected function removeFollows()
+	{
+		$userId = $this->user->user_id;
+
+		$follows = $this->finder('XF:UserFollow')
+			->whereOr(['user_id', $userId], ['follow_user_id', $userId])
+			->fetch();
+
+		foreach ($follows AS $follow)
+		{
+			$follow->delete(true, false);
 		}
 	}
 }

@@ -72,6 +72,34 @@ class VisibilityTest extends TestCase
 		$this->assertTrue($user->canViewBasicProfile());
 	}
 
+	public function test_nobody_can_start_following_an_api_user_and_it_can_follow_nobody()
+	{
+		$apiUser = $this->createApiUser();
+		$member = $this->createMember();
+		$other = $this->createMember();
+
+		$this->assertFalse($member->canFollowUser($apiUser));
+		$this->assertFalse($apiUser->canFollowUser($member));
+
+		// and the check is not simply refusing everybody
+		$this->assertTrue($member->canFollowUser($other));
+	}
+
+	/** Core's check also guards unfollowing, so a follow that already exists can still be removed. */
+	public function test_a_follow_that_already_exists_can_still_be_removed()
+	{
+		$apiUser = $this->createApiUser();
+		$member = $this->createMember();
+		$this->app()->db()->insert('xf_user_follow', [
+			'user_id' => $member->user_id, 'follow_user_id' => $apiUser->user_id, 'follow_date' => 1,
+		]);
+		$this->app()->db()->update('xf_user_profile', ['following' => (string) $apiUser->user_id], 'user_id = ?', $member->user_id);
+		$this->app()->em()->clearEntityCache();
+		$member = $this->app()->em()->find('XF:User', $member->user_id);
+
+		$this->assertTrue($member->canFollowUser($this->app()->em()->find('XF:User', $apiUser->user_id)));
+	}
+
 	public function test_an_ordinary_member_profile_is_unaffected()
 	{
 		$member = $this->createMember();

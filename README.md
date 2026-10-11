@@ -69,6 +69,10 @@ needs the **Manage API users** permission.
 connected accounts, passkeys, two-step verification, saved logins and OAuth tokens. Its API keys
 and any administrator record are kept. This cannot be undone.
 
+**It also stops following anyone, and anyone following it stops.** A follow names both accounts on
+each other's public profile. Nobody can start following an API user afterwards, and an API user
+can follow nobody.
+
 **An account that has been used as a member is refused**, and the page says where its content is.
 So are a banned or unconfirmed account, a moderator, and your own account. Content means anything
 XenForo itself would reassign when merging or deleting a user — posts, conversations, reactions,

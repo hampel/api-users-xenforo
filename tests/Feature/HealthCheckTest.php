@@ -130,6 +130,22 @@ class HealthCheckTest extends TestCase
 		$this->assertStringContainsString($user->username, $this->detail('logins'));
 	}
 
+	public function test_an_api_user_in_a_follow_either_way_round_is_a_warning()
+	{
+		$this->assertSame(HealthCheck::OK, $this->statuses()['follows']);
+
+		$follower = $this->healthyApiUser();
+		$followed = $this->healthyApiUser();
+		$member = $this->createMember();
+		$db = $this->app()->db();
+		$db->insert('xf_user_follow', ['user_id' => $follower->user_id, 'follow_user_id' => $member->user_id, 'follow_date' => 1]);
+		$db->insert('xf_user_follow', ['user_id' => $member->user_id, 'follow_user_id' => $followed->user_id, 'follow_date' => 1]);
+
+		$this->assertSame(HealthCheck::WARNING, $this->statuses()['follows']);
+		$this->assertStringContainsString($follower->username, $this->detail('follows'));
+		$this->assertStringContainsString($followed->username, $this->detail('follows'));
+	}
+
 	public function test_a_user_edit_modification_that_stops_matching_is_a_warning()
 	{
 		$this->assertSame(HealthCheck::OK, $this->statuses()['modifications']);

@@ -57,7 +57,7 @@ vendor/bin/phpunit
 ```
 
 **The feature tests run against the development forum's own database, inside a transaction each.**
-They create real accounts and roll them back. Two consequences:
+They create real accounts and roll them back. Three consequences:
 
 - **Touch shared tables by primary key only.** `xf_user_authenticate.scheme_class` has no index, so
   an update or delete by it scans the table and waits on every row another add-on's suite has
@@ -206,6 +206,13 @@ removal against rows written the way XenForo writes them.
 *About*, *Following* and *Followers* pages of the member it followed, as a guest. Conversion now
 removes them, a new one is refused, and `validate` warns of any, which it did for the four
 accounts converted before the change.
+
+**Merging, through core's own job, in the same sandbox on 2026-10-11.** Three merges were queued
+as the control panel queues them and the queue was run: an API user into a member, a member into
+an API user, and one member into another. The first two left both accounts, their posts and their
+API keys exactly as they were, each wrote one line to the server error log naming the pair and
+which of them is an API user, and neither job stayed in the queue. The third merged as core
+intends: the source gone and its posts on the target.
 
 ### Seeding API users
 

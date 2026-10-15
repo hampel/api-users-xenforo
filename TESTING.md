@@ -57,7 +57,8 @@ vendor/bin/phpunit
 ```
 
 **The feature tests run against the development forum's own database, inside a transaction each.**
-They create real accounts and roll them back. Three consequences:
+They create real accounts and roll them back, and they read the forum's own `config.php`. Four
+consequences:
 
 - **Touch shared tables by primary key only.** `xf_user_authenticate.scheme_class` has no index, so
   an update or delete by it scans the table and waits on every row another add-on's suite has
@@ -65,6 +66,11 @@ They create real accounts and roll them back. Three consequences:
 - **Feature tests can fail with a deadlock when another suite is using the same forum.** Each
   test creates accounts, and two suites doing so at once deadlock on `xf_user_group_relation`. Run
   again when the other has finished; a real failure is not a `DeadlockException`.
+- **The forum's Archive Site keys are cleared before every test**, both of them, in
+  `Tests\TestCase::setUp()`. The nested `archiveSite['protectedUsers']` takes precedence over the
+  older flat key, so on a forum that sets it, a test setting only the flat key was overridden and
+  failed. Found on 2026-10-15, when the development forum's `config.php` gained the nested key;
+  with the nested clear removed, that test fails there again.
 - **Nothing that runs DDL can be tested this way**: it commits the transaction. The second
   uninstall step is proved in a sandbox instead.
 

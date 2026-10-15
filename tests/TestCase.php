@@ -18,6 +18,20 @@ abstract class TestCase extends BaseTestCase
 	protected $addonsToLoad = ['Hampel/ApiUsers'];
 
 	/**
+	 * Archive Site's protected list comes from the forum's own config.php, which may set either
+	 * key. Both are cleared, so a test that sets neither means neither is set: the nested key
+	 * takes precedence, so a test setting only the older flat key would otherwise be overridden by
+	 * whatever the forum holds there.
+	 */
+	protected function setUp(): void
+	{
+		parent::setUp();
+
+		$this->setConfig('archiveSite', null);
+		$this->setConfig('archiveSiteProtectedUsers', null);
+	}
+
+	/**
 	 * An API user made the way both interfaces make one. Tests using this need
 	 * UsesDatabaseTransactions: the account is real and is rolled back.
 	 *

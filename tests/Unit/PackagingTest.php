@@ -25,7 +25,11 @@ class PackagingTest extends TestCase
 
 	public function test_build_json_removes_every_development_only_path_before_it_moves_the_documents(): void
 	{
-		$steps = json_decode($this->read(dirname(__DIR__, 2) . '/build.json'), true)['exec'];
+		$build = json_decode($this->read(dirname(__DIR__, 2) . '/build.json'), true);
+		$this->assertIsArray($build);
+		$steps = $build['exec'] ?? null;
+		$this->assertIsArray($steps);
+		$this->assertContainsOnlyString($steps);
 
 		$moves = array_keys(array_filter($steps, function ($step) { return strpos($step, 'mv ') === 0; }));
 		$this->assertNotEmpty($moves);
@@ -59,6 +63,7 @@ class PackagingTest extends TestCase
 			$files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator("{$root}/{$directory}", \FilesystemIterator::SKIP_DOTS));
 			foreach ($files AS $file)
 			{
+				$this->assertInstanceOf(\SplFileInfo::class, $file);
 				if (preg_match('/Hampel\\\\(Seeder|ApiUsers\\\\(Seed|Factory))\\\\/', $this->read($file->getPathname())))
 				{
 					$referring[] = substr($file->getPathname(), strlen($root) + 1);

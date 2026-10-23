@@ -220,7 +220,7 @@ class HealthCheck extends AbstractService
 			return [static::WARNING, 'There are no API users. Create one with api-users:create or under Setup > API users.'];
 		}
 
-		$orphans = $this->db()->fetchAllColumn('
+		$orphans = $this->fetchText('
 			SELECT api_user.user_id
 			FROM ' . static::TABLE . ' AS api_user
 			LEFT JOIN xf_user AS user ON (user.user_id = api_user.user_id)
@@ -240,7 +240,7 @@ class HealthCheck extends AbstractService
 	 */
 	public function checkScheme()
 	{
-		$names = $this->db()->fetchAllColumn('
+		$names = $this->fetchText('
 			SELECT user.username
 			FROM ' . static::TABLE . ' AS api_user
 			INNER JOIN xf_user AS user ON (user.user_id = api_user.user_id)
@@ -262,7 +262,7 @@ class HealthCheck extends AbstractService
 	 */
 	public function checkUnrecorded()
 	{
-		$names = $this->db()->fetchAllColumn('
+		$names = $this->fetchText('
 			SELECT user.username
 			FROM xf_user_authenticate AS auth
 			INNER JOIN xf_user AS user ON (user.user_id = auth.user_id)
@@ -290,7 +290,7 @@ class HealthCheck extends AbstractService
 		$db = $this->db();
 		$sm = $db->getSchemaManager();
 
-		$names = $db->fetchAllColumn('
+		$names = $this->fetchText('
 			SELECT DISTINCT user.username
 			FROM ' . static::TABLE . ' AS api_user
 			INNER JOIN xf_user AS user ON (user.user_id = api_user.user_id)
@@ -301,7 +301,7 @@ class HealthCheck extends AbstractService
 		// XenForo 2.3 only
 		if ($sm->tableExists('xf_passkey'))
 		{
-			$names = array_unique(array_merge($names, $db->fetchAllColumn('
+			$names = array_unique(array_merge($names, $this->fetchText('
 				SELECT DISTINCT user.username
 				FROM ' . static::TABLE . ' AS api_user
 				INNER JOIN xf_user AS user ON (user.user_id = api_user.user_id)
@@ -327,7 +327,7 @@ class HealthCheck extends AbstractService
 	 */
 	public function checkFollows()
 	{
-		$names = $this->db()->fetchAllColumn('
+		$names = $this->fetchText('
 			SELECT DISTINCT user.username
 			FROM ' . static::TABLE . ' AS api_user
 			INNER JOIN xf_user AS user ON (user.user_id = api_user.user_id)
@@ -350,7 +350,7 @@ class HealthCheck extends AbstractService
 	 */
 	public function checkEmail()
 	{
-		$names = $this->db()->fetchAllColumn('
+		$names = $this->fetchText('
 			SELECT user.username
 			FROM ' . static::TABLE . ' AS api_user
 			INNER JOIN xf_user AS user ON (user.user_id = api_user.user_id)
@@ -374,7 +374,7 @@ class HealthCheck extends AbstractService
 	 */
 	public function checkState()
 	{
-		$names = $this->db()->fetchAllColumn('
+		$names = $this->fetchText('
 			SELECT user.username
 			FROM ' . static::TABLE . ' AS api_user
 			INNER JOIN xf_user AS user ON (user.user_id = api_user.user_id)
@@ -396,7 +396,7 @@ class HealthCheck extends AbstractService
 	 */
 	public function checkAdmins()
 	{
-		$names = $this->db()->fetchAllColumn('
+		$names = $this->fetchText('
 			SELECT user.username
 			FROM ' . static::TABLE . ' AS api_user
 			INNER JOIN xf_user AS user ON (user.user_id = api_user.user_id)
@@ -424,7 +424,7 @@ class HealthCheck extends AbstractService
 	 */
 	public function checkKeys()
 	{
-		$names = $this->db()->fetchAllColumn('
+		$names = $this->fetchText('
 			SELECT user.username
 			FROM ' . static::TABLE . ' AS api_user
 			INNER JOIN xf_user AS user ON (user.user_id = api_user.user_id)
@@ -497,7 +497,21 @@ class HealthCheck extends AbstractService
 	{
 		$addOns = \XF::app()->container('addon.cache');
 
-		return isset($addOns['Hampel/ArchiveSite']);
+		return is_array($addOns) && isset($addOns['Hampel/ArchiveSite']);
+	}
+
+	/**
+	 * One column of a query, as text: every caller puts the values into a sentence.
+	 *
+	 * @param string $sql
+	 * @param mixed $params
+	 *
+	 * @return string[]
+	 */
+	protected function fetchText($sql, $params = [])
+	{
+		return array_map(function ($value) { return is_scalar($value) ? (string) $value : ''; },
+			$this->db()->fetchAllColumn($sql, $params));
 	}
 
 	/**

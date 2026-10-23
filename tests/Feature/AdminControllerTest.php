@@ -77,8 +77,12 @@ class AdminControllerTest extends TestCase
 		$reply = $this->dispatch('api-users', 'admin');
 
 		$this->assertReplyTemplate($reply, 'hampel_apiusers_list');
-		$this->assertArrayHasKey($user->user_id, $this->replyParam($reply, 'apiUsers')->toArray());
-		$this->assertArrayNotHasKey($user->user_id, $this->replyParam($reply, 'apiKeyCounts'));
+		$apiUsers = $this->replyParam($reply, 'apiUsers');
+		$this->assertInstanceOf(\XF\Mvc\Entity\AbstractCollection::class, $apiUsers);
+		$this->assertArrayHasKey($user->user_id, $apiUsers->toArray());
+		$apiKeyCounts = $this->replyParam($reply, 'apiKeyCounts');
+		$this->assertIsArray($apiKeyCounts);
+		$this->assertArrayNotHasKey($user->user_id, $apiKeyCounts);
 	}
 
 	public function test_saving_creates_an_api_user_recorded_against_the_acting_administrator(): void

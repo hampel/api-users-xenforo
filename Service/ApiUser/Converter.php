@@ -171,8 +171,27 @@ class Converter extends AbstractService
 
 		$property = new \ReflectionProperty($service, 'updates');
 		$property->setAccessible(true);
+		$updates = $property->getValue($service);
 
-		return $property->getValue($service);
+		// a map that cannot be read refuses conversion: skipping an entry would count its table
+		// as holding no content
+		if (!is_array($updates))
+		{
+			throw new \LogicException('The user content map is not an array.');
+		}
+
+		$map = [];
+		foreach ($updates AS $table => $definition)
+		{
+			if (!is_string($table) || !is_array($definition))
+			{
+				throw new \LogicException('The user content map has an entry that is not a table and its columns.');
+			}
+
+			$map[$table] = $definition;
+		}
+
+		return $map;
 	}
 
 	/**
@@ -192,14 +211,29 @@ class Converter extends AbstractService
 			{
 				if (is_int($key) && is_array($one) && isset($one[0]))
 				{
-					$columns[] = $one[0];
+					$columns[] = $this->columnName($one[0]);
 				}
 			}
 
 			return $columns;
 		}
 
-		return isset($definition[0]) ? [$definition[0]] : [];
+		return isset($definition[0]) ? [$this->columnName($definition[0])] : [];
+	}
+
+	/**
+	 * @param mixed $column
+	 *
+	 * @return string
+	 */
+	protected function columnName($column)
+	{
+		if (!is_string($column))
+		{
+			throw new \LogicException('The user content map names a column that is not a string.');
+		}
+
+		return $column;
 	}
 
 	/**

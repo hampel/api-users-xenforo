@@ -58,13 +58,11 @@ class ApiUser extends AbstractController
 	{
 		$this->assertPostOnly();
 
-		$input = $this->filter([
-			'username' => 'str',
-			'note' => 'str',
-			'is_admin' => 'bool',
-		]);
+		$username = $this->filterText('username');
+		$note = $this->filterText('note');
+		$isAdmin = (bool) $this->filter('is_admin', 'bool');
 
-		if ($input['is_admin'])
+		if ($isAdmin)
 		{
 			// Manage API users must not be a second door to minting administrators: core asks for
 			// its own permission and the acting administrator's password, so this does too.
@@ -80,10 +78,10 @@ class ApiUser extends AbstractController
 		}
 
 		/** @var \Hampel\ApiUsers\Service\ApiUser\Creator $creator */
-		$creator = $this->service('Hampel\ApiUsers:ApiUser\Creator', $input['username']);
-		$creator->setNote($input['note']);
+		$creator = $this->service('Hampel\ApiUsers:ApiUser\Creator', $username);
+		$creator->setNote($note);
 		$creator->setCreatedBy(\XF::visitor());
-		$creator->setAdmin($input['is_admin']);
+		$creator->setAdmin($isAdmin);
 
 		if (!$creator->validate($errors))
 		{
@@ -115,7 +113,7 @@ class ApiUser extends AbstractController
 
 		/** @var \Hampel\ApiUsers\Service\ApiUser\Converter $converter */
 		$converter = $this->service('Hampel\ApiUsers:ApiUser\Converter', $user);
-		$converter->setNote($this->filter('note', 'str'));
+		$converter->setNote($this->filterText('note'));
 		$converter->setCreatedBy(\XF::visitor());
 
 		$blockers = $converter->getBlockers();
@@ -148,6 +146,21 @@ class ApiUser extends AbstractController
 	protected function canMakeAdmin()
 	{
 		return \XF::visitor()->hasAdminPermission('admin');
+	}
+
+	/**
+	 * A text input. filter() is typed mixed whatever filter it is given, and 'str' always gives a
+	 * string, so the check costs nothing and tells static analysis what the filter already does.
+	 *
+	 * @param string $key
+	 *
+	 * @return string
+	 */
+	protected function filterText($key)
+	{
+		$value = $this->filter($key, 'str');
+
+		return is_string($value) ? $value : '';
 	}
 
 	/**

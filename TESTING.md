@@ -83,7 +83,7 @@ vendor/bin/xenforo-phpstan generate           # once per forum, and after a XenF
 vendor/bin/phpstan analyse --memory-limit=1G
 ```
 
-**Level 8, with no errors and no baseline**, since 2026-10-23, through `hampel/xenforo-phpstan`.
+**Level 9, with no errors and no baseline**, since 2026-10-23, through `hampel/xenforo-phpstan`.
 Run it from this directory with this add-on's own `vendor/bin/phpstan`. `generate` writes into the
 forum's `internal_data/phpstan/`, not into this repository, and a stale set fails loudly.
 
@@ -102,7 +102,11 @@ forum's `internal_data/phpstan/`, not into this repository, and a stale set fail
 - **XenForo types a user's id as `int|null` and its `Auth` relation as nullable**, since a user not
   yet saved has neither. The tests read them through `idOf()` and `authOf()` on the base
   `TestCase`, which assert that they are there, and look an account up with `findUser()`.
-- **Level 9 is the next step**: 34 errors on that date, 12 in the tests. Level max was 168.
+- **A value typed `mixed` is checked before it is used, never cast.** Request input and console
+  options go through `is_string()`, which the filter or option definition already guarantees.
+  Core's content map, read by reflection, is checked entry by entry, and a malformed one throws:
+  skipping an entry would count its table as holding no content and let a used account convert.
+- **Level max is the next step**: 129 errors on that date, 40 in the tests.
 
 **One report needed a change to the code rather than to the configuration.** The four `instanceof`
 tests in `HealthCheck::checkExtensions()` read as always true, because the analysis types what the

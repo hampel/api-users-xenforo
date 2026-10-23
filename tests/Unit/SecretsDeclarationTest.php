@@ -41,6 +41,7 @@ class SecretsDeclarationTest extends TestCase
 		$files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($root, \FilesystemIterator::SKIP_DOTS));
 		foreach ($files AS $file)
 		{
+			$this->assertInstanceOf(\SplFileInfo::class, $file);
 			$path = substr($file->getPathname(), strlen($root) + 1);
 			if (substr($path, -4) !== '.php' || preg_match('#^(vendor|tests|_output|_data|_releases)/#', $path))
 			{

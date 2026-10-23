@@ -34,8 +34,10 @@ class Create extends Command
 	{
 		/** @var \Hampel\ApiUsers\Service\ApiUser\Creator $creator */
 		$creator = \XF::service('Hampel\ApiUsers:ApiUser\Creator', $input->getArgument('username'));
-		$creator->setNote($input->getOption('note'));
-		$creator->setAdmin($input->getOption('admin'));
+		// options are typed mixed: --note takes a value and defaults to '', --admin takes none
+		$note = $input->getOption('note');
+		$creator->setNote(is_string($note) ? $note : '');
+		$creator->setAdmin((bool) $input->getOption('admin'));
 
 		if (!$creator->validate($errors))
 		{

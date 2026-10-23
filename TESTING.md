@@ -307,6 +307,13 @@ API keys exactly as they were, each wrote one line to the server error log namin
 which of them is an API user, and neither job stayed in the queue. The third merged as core
 intends: the source gone and its posts on the target.
 
+**Poll votes, in a sandbox on 2026-10-23**, XenForo 2.3.13 with PHP 8.3 and Seeder `1.0.0b8`.
+Six poll threads by one member, voted on by three others who wrote nothing, with each poll's
+voter count matching its vote rows. Each of the three was refused, naming `xf_poll_vote` and
+nothing else. The author was refused for its threads and posts, and a member with no content was
+converted as the control. Until then, the refusal for a vote had been checked only against a row
+the suite inserted itself.
+
 ### Seeding API users
 
 `Seed/ApiUserSeeder` makes API users in each state the list page shows, on a forum that has the

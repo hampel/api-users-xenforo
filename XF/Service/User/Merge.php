@@ -14,6 +14,9 @@ class Merge extends XFCP_Merge
 {
 	public function merge($maxRunTime = 0)
 	{
+		// set by setSource() and setTarget(), not the constructor, so either can still be null
+		// here; core documents both as User
+		// @phpstan-ignore booleanAnd.leftAlwaysTrue, booleanAnd.rightAlwaysTrue
 		if ($this->source && $this->target && $this->source->user_id != $this->target->user_id)
 		{
 			foreach ([$this->source, $this->target] AS $user)

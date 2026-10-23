@@ -97,20 +97,20 @@ class HealthCheck extends AbstractService
 	{
 		$missing = [];
 
-		if (!($this->em()->create('XF:User') instanceof \Hampel\ApiUsers\XF\Entity\User))
+		if (!$this->isExtendedBy($this->em()->create('XF:User'), \Hampel\ApiUsers\XF\Entity\User::class))
 		{
 			$missing[] = 'XF\Entity\User';
 		}
-		if (!($this->em()->create('XF:UserAuth') instanceof \Hampel\ApiUsers\XF\Entity\UserAuth))
+		if (!$this->isExtendedBy($this->em()->create('XF:UserAuth'), \Hampel\ApiUsers\XF\Entity\UserAuth::class))
 		{
 			$missing[] = 'XF\Entity\UserAuth';
 		}
-		if (!($this->finder('XF:User') instanceof \Hampel\ApiUsers\XF\Finder\User))
+		if (!$this->isExtendedBy($this->finder('XF:User'), \Hampel\ApiUsers\XF\Finder\User::class))
 		{
 			$missing[] = 'XF\Finder\User';
 		}
 
-		if (!($this->service('XF:User\Merge') instanceof \Hampel\ApiUsers\XF\Service\User\Merge))
+		if (!$this->isExtendedBy($this->service('XF:User\Merge'), \Hampel\ApiUsers\XF\Service\User\Merge::class))
 		{
 			$missing[] = 'XF\Service\User\Merge';
 		}
@@ -122,6 +122,21 @@ class HealthCheck extends AbstractService
 		}
 
 		return [static::OK, 'The password guard, the email guard, the member listing filter and the merge refusal are applied.'];
+	}
+
+	/**
+	 * Whether the object the container built is this add-on's extension. A method of its own,
+	 * because static analysis types the container's answer as the extension already, which is the
+	 * very thing this asks at runtime.
+	 *
+	 * @param object $object
+	 * @param string $extension
+	 *
+	 * @return bool
+	 */
+	protected function isExtendedBy($object, $extension)
+	{
+		return $object instanceof $extension;
 	}
 
 	/**

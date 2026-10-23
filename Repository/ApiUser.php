@@ -6,7 +6,7 @@ use XF\Mvc\Entity\Repository;
 class ApiUser extends Repository
 {
 	/**
-	 * @return \XF\Mvc\Entity\Finder
+	 * @return \XF\Mvc\Entity\Finder<\Hampel\ApiUsers\Entity\ApiUser>
 	 */
 	public function findApiUsersForList()
 	{

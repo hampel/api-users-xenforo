@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
  */
 class PackagingTest extends TestCase
 {
-	private const DEVELOPMENT_ONLY = ['Seed', 'Factory', 'tests', 'vendor', 'TESTING.md', 'CLAUDE.md', 'CLAUDE.local.md'];
+	private const DEVELOPMENT_ONLY = ['Seed', 'Factory', 'tests', 'vendor', 'TESTING.md', 'CLAUDE.md', 'CLAUDE.local.md', 'phpstan.neon'];
 
 	public function test_build_json_removes_every_development_only_path_before_it_moves_the_documents()
 	{

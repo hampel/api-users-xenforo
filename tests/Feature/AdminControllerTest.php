@@ -60,8 +60,8 @@ class AdminControllerTest extends TestCase
 
 		$this->assertReplyIsView($reply);
 		$this->assertReplyTemplate($reply, 'hampel_apiusers_list');
-		$this->assertArrayHasKey($user->user_id, $reply->getParam('apiUsers')->toArray());
-		$this->assertArrayNotHasKey($user->user_id, $reply->getParam('apiKeyCounts'));
+		$this->assertArrayHasKey($user->user_id, $this->replyParam($reply, 'apiUsers')->toArray());
+		$this->assertArrayNotHasKey($user->user_id, $this->replyParam($reply, 'apiKeyCounts'));
 	}
 
 	public function test_saving_creates_an_api_user_recorded_against_the_acting_administrator()
@@ -152,7 +152,7 @@ class AdminControllerTest extends TestCase
 
 		$this->assertReplyIsView($reply);
 		$this->assertReplyTemplate($reply, 'hampel_apiusers_convert');
-		$this->assertSame([], $reply->getParam('blockers'));
+		$this->assertSame([], $this->replyParam($reply, 'blockers'));
 		$this->assertNotSame('', $this->app()->db()->fetchOne('SELECT email FROM xf_user WHERE user_id = ?', $member->user_id));
 	}
 
@@ -163,10 +163,7 @@ class AdminControllerTest extends TestCase
 
 		$reply = $this->dispatch('api-users/' . $member->user_id . '/convert', 'admin', ['note' => 'the old bot'], [], 'POST');
 
-		$this->assertReplyIsRedirect($reply);
-		$this->assertStringContainsString(
-			$this->app()->router('admin')->buildLink('users/edit', $member), $reply->getUrl()
-		);
+		$this->assertReplyIsRedirect($reply, $this->app()->router('admin')->buildLink('users/edit', $member));
 		$this->assertIsApiOnly($member->user_id);
 
 		$row = $this->app()->db()->fetchRow('SELECT * FROM xf_hampel_apiusers_user WHERE user_id = ?', $member->user_id);
@@ -182,7 +179,7 @@ class AdminControllerTest extends TestCase
 			'user_id' => $member->user_id, 'poll_response_id' => 2147480000, 'poll_id' => 2147480000, 'vote_date' => 1,
 		]);
 
-		$this->assertNotEmpty($this->dispatch('api-users/' . $member->user_id . '/convert', 'admin')->getParam('blockers'));
+		$this->assertNotEmpty($this->replyParam($this->dispatch('api-users/' . $member->user_id . '/convert', 'admin'), 'blockers'));
 		$this->assertReplyIsError(
 			$this->dispatch('api-users/' . $member->user_id . '/convert', 'admin', [], [], 'POST'),
 			null, 'It has been used as a member.'
@@ -227,9 +224,9 @@ class AdminControllerTest extends TestCase
 	public function test_the_add_form_offers_the_administrator_option_only_to_those_who_may_use_it()
 	{
 		$this->admin(['hampelApiUsers']);
-		$this->assertFalse($this->dispatch('api-users/add', 'admin')->getParam('canMakeAdmin'));
+		$this->assertFalse($this->replyParam($this->dispatch('api-users/add', 'admin'), 'canMakeAdmin'));
 
 		$this->admin(['hampelApiUsers', 'admin']);
-		$this->assertTrue($this->dispatch('api-users/add', 'admin')->getParam('canMakeAdmin'));
+		$this->assertTrue($this->replyParam($this->dispatch('api-users/add', 'admin'), 'canMakeAdmin'));
 	}
 }

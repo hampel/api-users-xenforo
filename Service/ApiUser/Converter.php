@@ -269,7 +269,7 @@ class Converter extends AbstractService
 					FROM xf_oauth_refresh_token AS refresh_token
 					INNER JOIN xf_oauth_token AS token ON (token.token_id = refresh_token.token_id)
 					WHERE token.user_id = ?
-				', $userId);
+				', [$userId]);
 			}
 
 			$db->delete('xf_oauth_token', 'user_id = ?', $userId);

@@ -19,6 +19,7 @@ class HealthCheckTest extends TestCase
 		$this->setAsideForumApiUsers();
 	}
 
+	/** @phpstan-impure */
 	private function statuses()
 	{
 		$results = $this->app()->service('Hampel\ApiUsers:HealthCheck')->run();

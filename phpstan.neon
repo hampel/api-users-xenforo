@@ -1,0 +1,25 @@
+includes:
+    - vendor/hampel/xenforo-phpstan/extension.neon
+
+parameters:
+    level: 5
+
+    paths:
+        - .
+
+    excludePaths:
+        analyseAndScan:
+            - vendor (?)
+        analyse:
+            - _output (?)
+            - _releases (?)
+            - _data (?)
+            # They extend the Seeder add-on, which is not a dependency, and call the Faker it
+            # vendors; another add-on's vendor/ is deliberately left out of the scan
+            - Seed
+            - Factory
+
+    # Route parameters are whatever the route names, so no static type can know them. Entities are
+    # not made crates: their columns are declared, and a mistyped one should be reported
+    universalObjectCratesClasses:
+        - XF\Mvc\ParameterBag

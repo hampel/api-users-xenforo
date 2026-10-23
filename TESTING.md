@@ -74,6 +74,34 @@ consequences:
 - **Nothing that runs DDL can be tested this way**: it commits the transaction. The second
   uninstall step is proved in a sandbox instead.
 
+### Static analysis
+
+```bash
+vendor/bin/xenforo-phpstan generate      # once per forum, and after a XenForo upgrade
+vendor/bin/phpstan analyse --memory-limit=1G
+```
+
+**Level 5, with no errors and no baseline**, since 2026-10-23, through `hampel/xenforo-phpstan`.
+Run it from this directory with this add-on's own `vendor/bin/phpstan`. `generate` writes into the
+forum's `internal_data/phpstan/`, not into this repository, and a stale set fails loudly.
+
+- **`Seed/` and `Factory/` are not analysed.** They extend the Seeder add-on and call the Faker it
+  vendors, and another add-on's `vendor/` is deliberately left out of the scan.
+- **Only `XF\Mvc\ParameterBag` is treated as an object crate.** Route parameters have no static
+  type. Entities are not crates, so a mistyped column is still reported.
+- **It runs against the analysis PHP, not against 7.4.** A `phpVersion` floor of 7.4 hides
+  PHPUnit 12 from the analysis and breaks every test, so the 7.4 floor is held by the release
+  lint in a sandbox instead. The shipped code alone was clean against 7.4 at level 5 on that date.
+- **Level 6 is the next step and is mostly docblocks**: 239 errors on that date, 65 in the shipped
+  code and 174 in the tests. Levels 7, 8, 9 and max were 248, 266, 294 and 534.
+
+**One report needed a change to the code rather than to the configuration.** The four `instanceof`
+tests in `HealthCheck::checkExtensions()` read as always true, because the analysis types what the
+container builds as this add-on's extension already, which is the very thing the check asks at
+runtime. They go through a method of their own now. One more is ignored by identifier: the merge
+extension's guard on its source and target, which core documents as `User` and sets by setters,
+so either can still be null.
+
 ### What the suite proves
 
 - `ApiOnlyTest` — the scheme never authenticates, reports a password, is not upgradable, and its

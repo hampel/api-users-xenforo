@@ -2,6 +2,10 @@
 
 use XF\Mvc\Entity\Structure;
 
+/**
+ * RELATIONS
+ * @property-read \Hampel\ApiUsers\Entity\ApiUser|null $ApiUser
+ */
 class User extends XFCP_User
 {
 	/**

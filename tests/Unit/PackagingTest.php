@@ -10,7 +10,7 @@ class PackagingTest extends TestCase
 {
 	private const DEVELOPMENT_ONLY = ['Seed', 'Factory', 'tests', 'vendor', 'TESTING.md', 'CLAUDE.md', 'CLAUDE.local.md', 'phpstan.neon'];
 
-	public function test_build_json_removes_every_development_only_path_before_it_moves_the_documents()
+	public function test_build_json_removes_every_development_only_path_before_it_moves_the_documents(): void
 	{
 		$steps = json_decode(file_get_contents(dirname(__DIR__, 2) . '/build.json'), true)['exec'];
 
@@ -36,7 +36,7 @@ class PackagingTest extends TestCase
 	}
 
 	/** The seeder classes need another add-on, so nothing this add-on ships may refer to them. */
-	public function test_nothing_outside_the_development_directories_refers_to_them()
+	public function test_nothing_outside_the_development_directories_refers_to_them(): void
 	{
 		$root = dirname(__DIR__, 2);
 		$referring = [];

@@ -47,8 +47,8 @@ class HealthCheck extends AbstractService
 	];
 
 	/**
-	 * @return array[] each ['check' => key, 'section' => text, 'label' => text,
-	 *     'status' => OK|WARNING|PROBLEM|SKIPPED, 'detail' => text]
+	 * @return list<array{check: string, section: string, label: string, status: string, detail: string}>
+	 *     status is one of OK, WARNING, PROBLEM and SKIPPED
 	 */
 	public function run()
 	{
@@ -83,6 +83,9 @@ class HealthCheck extends AbstractService
 		return $results;
 	}
 
+	/**
+	 * @return array{0: string, 1: string} a status, and the detail shown beside it
+	 */
 	public function checkTable()
 	{
 		if (!$this->db()->getSchemaManager()->tableExists(static::TABLE))
@@ -93,6 +96,9 @@ class HealthCheck extends AbstractService
 		return [static::OK, static::TABLE];
 	}
 
+	/**
+	 * @return array{0: string, 1: string} a status, and the detail shown beside it
+	 */
 	public function checkExtensions()
 	{
 		$missing = [];
@@ -143,6 +149,8 @@ class HealthCheck extends AbstractService
 	 * Proves the exclusion by reading the query, because being applied is not enough: another
 	 * add-on's extension of isValidUser() that replaces the method without calling its parent
 	 * discards this one's condition if it sits outside it.
+	 *
+	 * @return array{0: string, 1: string} a status, and the detail shown beside it
 	 */
 	public function checkListings()
 	{
@@ -166,6 +174,8 @@ class HealthCheck extends AbstractService
 	 * The modifications to core's user edit page match text in a core template, so a XenForo
 	 * release that rewords it stops one matching and nothing errors. A warning: the entity guards
 	 * do not depend on them, only what an administrator is shown.
+	 *
+	 * @return array{0: string, 1: string} a status, and the detail shown beside it
 	 */
 	public function checkModifications()
 	{
@@ -199,6 +209,9 @@ class HealthCheck extends AbstractService
 		return [static::OK, count($mods) . ' modifications applying.'];
 	}
 
+	/**
+	 * @return array{0: string, 1: string} a status, and the detail shown beside it
+	 */
 	public function checkAccounts()
 	{
 		$total = $this->db()->fetchOne('SELECT COUNT(*) FROM ' . static::TABLE);
@@ -222,6 +235,9 @@ class HealthCheck extends AbstractService
 		return [static::OK, $total . ' recorded.'];
 	}
 
+	/**
+	 * @return array{0: string, 1: string} a status, and the detail shown beside it
+	 */
 	public function checkScheme()
 	{
 		$names = $this->db()->fetchAllColumn('
@@ -241,6 +257,9 @@ class HealthCheck extends AbstractService
 		return [static::OK, 'Every API user is on the API-only scheme.'];
 	}
 
+	/**
+	 * @return array{0: string, 1: string} a status, and the detail shown beside it
+	 */
 	public function checkUnrecorded()
 	{
 		$names = $this->db()->fetchAllColumn('
@@ -263,6 +282,8 @@ class HealthCheck extends AbstractService
 
 	/**
 	 * A connected account or a passkey logs its user in whatever the authentication scheme says.
+	 *
+	 * @return array{0: string, 1: string} a status, and the detail shown beside it
 	 */
 	public function checkOtherLogins()
 	{
@@ -301,6 +322,8 @@ class HealthCheck extends AbstractService
 	/**
 	 * A follow names both accounts on each other's public profile. Converting removes them and
 	 * nothing new can be made through XenForo, so one here was written some other way.
+	 *
+	 * @return array{0: string, 1: string} a status, and the detail shown beside it
 	 */
 	public function checkFollows()
 	{
@@ -322,6 +345,9 @@ class HealthCheck extends AbstractService
 		return [static::OK, 'No API user follows a member or is followed by one.'];
 	}
 
+	/**
+	 * @return array{0: string, 1: string} a status, and the detail shown beside it
+	 */
 	public function checkEmail()
 	{
 		$names = $this->db()->fetchAllColumn('
@@ -343,6 +369,8 @@ class HealthCheck extends AbstractService
 	/**
 	 * The REST API resolves a key whose user is not valid, or is banned, to the guest permission
 	 * combination. A warning and not a failure: banning an API user is also how one is suspended.
+	 *
+	 * @return array{0: string, 1: string} a status, and the detail shown beside it
 	 */
 	public function checkState()
 	{
@@ -363,6 +391,9 @@ class HealthCheck extends AbstractService
 		return [static::OK, 'Every API user is valid and not banned.'];
 	}
 
+	/**
+	 * @return array{0: string, 1: string} a status, and the detail shown beside it
+	 */
 	public function checkAdmins()
 	{
 		$names = $this->db()->fetchAllColumn('
@@ -388,6 +419,9 @@ class HealthCheck extends AbstractService
 		return [static::OK, $admins . ' of the API users ' . ($admins == 1 ? 'is an administrator.' : 'are administrators.')];
 	}
 
+	/**
+	 * @return array{0: string, 1: string} a status, and the detail shown beside it
+	 */
 	public function checkKeys()
 	{
 		$names = $this->db()->fetchAllColumn('
@@ -419,6 +453,8 @@ class HealthCheck extends AbstractService
 	 * supported way to keep an API user out of a run.
 	 *
 	 * Reads that add-on's config.php keys and nothing else of it; this is not a dependency.
+	 *
+	 * @return array{0: string, 1: string} a status, and the detail shown beside it
 	 */
 	public function checkArchiveSite()
 	{

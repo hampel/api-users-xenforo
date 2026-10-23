@@ -12,7 +12,7 @@ class SetupTest extends TestCase
 	 * Only the first uninstall step is run here: the second drops the table, and DDL commits the
 	 * transaction this suite relies on. That one is proved by uninstalling in a sandbox.
 	 */
-	public function test_uninstall_moves_api_users_to_a_scheme_that_survives_this_add_on()
+	public function test_uninstall_moves_api_users_to_a_scheme_that_survives_this_add_on(): void
 	{
 		$user = $this->createApiUser();
 		$member = $this->createMember();

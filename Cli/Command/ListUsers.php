@@ -8,6 +8,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ListUsers extends Command
 {
+	/**
+	 * @return void
+	 */
 	protected function configure()
 	{
 		$this

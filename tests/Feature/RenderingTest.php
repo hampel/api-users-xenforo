@@ -33,6 +33,8 @@ class RenderingTest extends TestCase
 	 * <xf:pageaction>, so it is a page parameter and no part of the rendered body; it has to be
 	 * read before anything else renders.
 	 *
+	 * @param int $userId
+	 *
 	 * @return string[]
 	 */
 	private function editPage($userId)
@@ -42,7 +44,7 @@ class RenderingTest extends TestCase
 		return [$html, (string) $this->pageParam('pageAction')];
 	}
 
-	public function test_the_list_names_each_api_user_with_its_note_and_who_made_it()
+	public function test_the_list_names_each_api_user_with_its_note_and_who_made_it(): void
 	{
 		$this->actingAsAdministrator(['hampelApiUsers' => true]);
 
@@ -68,7 +70,7 @@ class RenderingTest extends TestCase
 		$this->assertNoTemplateErrors(self::TEMPLATES);
 	}
 
-	public function test_the_list_marks_an_administrator_and_an_account_whose_scheme_has_drifted()
+	public function test_the_list_marks_an_administrator_and_an_account_whose_scheme_has_drifted(): void
 	{
 		$this->actingAsAdministrator(['hampelApiUsers' => true]);
 		$user = $this->createApiUser(true);
@@ -86,7 +88,7 @@ class RenderingTest extends TestCase
 		$this->assertNoTemplateErrors(self::TEMPLATES);
 	}
 
-	public function test_the_add_form_shows_the_administrator_option_only_to_those_who_may_use_it()
+	public function test_the_add_form_shows_the_administrator_option_only_to_those_who_may_use_it(): void
 	{
 		$this->actingAsAdministrator(['hampelApiUsers' => true]);
 		$without = $this->renderReply($this->dispatch('api-users/add', 'admin'));
@@ -106,7 +108,7 @@ class RenderingTest extends TestCase
 		$this->assertNoTemplateErrors(self::TEMPLATES);
 	}
 
-	public function test_the_convert_page_says_what_is_removed_and_offers_the_form()
+	public function test_the_convert_page_says_what_is_removed_and_offers_the_form(): void
 	{
 		$this->actingAsAdministrator(['hampelApiUsers' => true]);
 		$member = $this->createMember();
@@ -121,7 +123,7 @@ class RenderingTest extends TestCase
 		$this->assertNoTemplateErrors(self::TEMPLATES);
 	}
 
-	public function test_the_convert_page_lists_the_reasons_and_offers_no_form_when_it_would_refuse()
+	public function test_the_convert_page_lists_the_reasons_and_offers_no_form_when_it_would_refuse(): void
 	{
 		$this->actingAsAdministrator(['hampelApiUsers' => true]);
 		$member = $this->createMember();
@@ -140,7 +142,7 @@ class RenderingTest extends TestCase
 		$this->assertNoTemplateErrors(self::TEMPLATES);
 	}
 
-	public function test_all_five_edit_page_modifications_are_applied()
+	public function test_all_five_edit_page_modifications_are_applied(): void
 	{
 		$this->assertTemplateModificationApplied('hampelApiUsersUserEditNotice');
 		$this->assertTemplateModificationApplied('hampelApiUsersUserEditConvert');
@@ -149,7 +151,7 @@ class RenderingTest extends TestCase
 		$this->assertTemplateModificationApplied('hampelApiUsersUserEditMerge');
 	}
 
-	public function test_an_api_user_edit_page_carries_the_notice_and_no_email_or_password_field()
+	public function test_an_api_user_edit_page_carries_the_notice_and_no_email_or_password_field(): void
 	{
 		$this->actingAsAdministrator(['user' => true, 'hampelApiUsers' => true]);
 		$user = $this->createApiUser();
@@ -167,7 +169,7 @@ class RenderingTest extends TestCase
 		$this->assertNoUnresolvedPhrases($html, self::PHRASES);
 	}
 
-	public function test_an_ordinary_member_edit_page_is_as_core_made_it_plus_the_convert_action()
+	public function test_an_ordinary_member_edit_page_is_as_core_made_it_plus_the_convert_action(): void
 	{
 		$this->actingAsAdministrator(['user' => true, 'hampelApiUsers' => true]);
 		$member = $this->createMember();
@@ -187,7 +189,7 @@ class RenderingTest extends TestCase
 	}
 
 	/** The fields stay hidden whoever is looking; only the links into this add-on's pages go. */
-	public function test_without_manage_api_users_the_edit_page_offers_no_way_into_this_add_on()
+	public function test_without_manage_api_users_the_edit_page_offers_no_way_into_this_add_on(): void
 	{
 		$this->actingAsAdministrator(['user' => true]);
 		$user = $this->createApiUser();
@@ -206,7 +208,7 @@ class RenderingTest extends TestCase
 		$this->assertDontSee($actions, 'api-users', false);
 	}
 
-	public function test_the_add_user_page_is_left_alone()
+	public function test_the_add_user_page_is_left_alone(): void
 	{
 		$this->actingAsAdministrator(['user' => true, 'hampelApiUsers' => true]);
 

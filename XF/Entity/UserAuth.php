@@ -4,6 +4,9 @@ use Hampel\ApiUsers\Authentication\ApiOnly;
 
 class UserAuth extends XFCP_UserAuth
 {
+	/**
+	 * @return void
+	 */
 	protected function _preSave()
 	{
 		parent::_preSave();

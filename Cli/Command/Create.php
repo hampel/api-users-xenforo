@@ -15,6 +15,9 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class Create extends Command
 {
+	/**
+	 * @return void
+	 */
 	protected function configure()
 	{
 		$this

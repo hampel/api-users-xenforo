@@ -7,12 +7,16 @@ class VisibilityTest extends TestCase
 {
 	use UsesDatabaseTransactions;
 
+	/**
+	 * @param int $userId
+	 * @return bool
+	 */
 	private function isListedAsValid($userId)
 	{
 		return (bool) $this->app()->finder('XF:User')->isValidUser()->where('user_id', $userId)->fetchOne();
 	}
 
-	public function test_an_api_user_is_left_out_of_public_member_listings()
+	public function test_an_api_user_is_left_out_of_public_member_listings(): void
 	{
 		$user = $this->createApiUser();
 		$member = $this->createMember();
@@ -21,7 +25,7 @@ class VisibilityTest extends TestCase
 		$this->assertTrue($this->isListedAsValid($member->user_id));
 	}
 
-	public function test_an_api_user_is_not_counted_as_a_member()
+	public function test_an_api_user_is_not_counted_as_a_member(): void
 	{
 		$before = $this->app()->finder('XF:User')->isValidUser()->total();
 
@@ -31,7 +35,7 @@ class VisibilityTest extends TestCase
 	}
 
 	/** The control panel's username autocomplete asks the same question, and must find it. */
-	public function test_the_control_panel_still_lists_an_api_user_as_valid()
+	public function test_the_control_panel_still_lists_an_api_user_as_valid(): void
 	{
 		$user = $this->createApiUser();
 
@@ -40,7 +44,7 @@ class VisibilityTest extends TestCase
 		$this->assertTrue($this->isListedAsValid($user->user_id));
 	}
 
-	public function test_the_control_panel_user_search_finds_an_api_user()
+	public function test_the_control_panel_user_search_finds_an_api_user(): void
 	{
 		$user = $this->createApiUser();
 
@@ -49,7 +53,7 @@ class VisibilityTest extends TestCase
 		$this->assertSame(1, $searcher->getFinder()->total());
 	}
 
-	public function test_a_guest_and_a_member_cannot_view_its_profile()
+	public function test_a_guest_and_a_member_cannot_view_its_profile(): void
 	{
 		$user = $this->createApiUser();
 
@@ -62,7 +66,7 @@ class VisibilityTest extends TestCase
 		$this->assertFalse($user->canViewBasicProfile());
 	}
 
-	public function test_staff_who_can_bypass_user_privacy_can_view_its_profile()
+	public function test_staff_who_can_bypass_user_privacy_can_view_its_profile(): void
 	{
 		$user = $this->createApiUser();
 
@@ -72,7 +76,7 @@ class VisibilityTest extends TestCase
 		$this->assertTrue($user->canViewBasicProfile());
 	}
 
-	public function test_nobody_can_start_following_an_api_user_and_it_can_follow_nobody()
+	public function test_nobody_can_start_following_an_api_user_and_it_can_follow_nobody(): void
 	{
 		$apiUser = $this->createApiUser();
 		$member = $this->createMember();
@@ -86,7 +90,7 @@ class VisibilityTest extends TestCase
 	}
 
 	/** Core's check also guards unfollowing, so a follow that already exists can still be removed. */
-	public function test_a_follow_that_already_exists_can_still_be_removed()
+	public function test_a_follow_that_already_exists_can_still_be_removed(): void
 	{
 		$apiUser = $this->createApiUser();
 		$member = $this->createMember();
@@ -100,7 +104,7 @@ class VisibilityTest extends TestCase
 		$this->assertTrue($member->canFollowUser($this->app()->em()->find('XF:User', $apiUser->user_id)));
 	}
 
-	public function test_an_ordinary_member_profile_is_unaffected()
+	public function test_an_ordinary_member_profile_is_unaffected(): void
 	{
 		$member = $this->createMember();
 

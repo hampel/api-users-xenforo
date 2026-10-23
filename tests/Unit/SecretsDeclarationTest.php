@@ -9,6 +9,9 @@ use Tests\TestCase;
  */
 class SecretsDeclarationTest extends TestCase
 {
+	/**
+	 * @return array<string, mixed>
+	 */
 	private function declarations()
 	{
 		$declarations = [];
@@ -17,12 +20,12 @@ class SecretsDeclarationTest extends TestCase
 		return $declarations;
 	}
 
-	public function test_it_declares_this_add_on_only()
+	public function test_it_declares_this_add_on_only(): void
 	{
 		$this->assertSame(['Hampel/ApiUsers'], array_keys($this->declarations()));
 	}
 
-	public function test_it_has_no_options_to_declare()
+	public function test_it_has_no_options_to_declare(): void
 	{
 		$options = glob(dirname(__DIR__, 2) . '/_output/options/*.json') ?: [];
 
@@ -31,7 +34,7 @@ class SecretsDeclarationTest extends TestCase
 	}
 
 	/** config.php is read for Hampel/ArchiveSite's protected list, which that add-on declares. */
-	public function test_it_reads_no_config_key_of_its_own()
+	public function test_it_reads_no_config_key_of_its_own(): void
 	{
 		$readers = [];
 		$root = dirname(__DIR__, 2);

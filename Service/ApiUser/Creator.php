@@ -27,6 +27,10 @@ class Creator extends AbstractService
 	/** @var bool */
 	protected $admin = false;
 
+	/**
+	 * @param \XF\App $app
+	 * @param string $username
+	 */
 	public function __construct(\XF\App $app, $username)
 	{
 		parent::__construct($app);
@@ -34,6 +38,10 @@ class Creator extends AbstractService
 		$this->user = $this->setupUser($username);
 	}
 
+	/**
+	 * @param string $username
+	 * @return User
+	 */
 	protected function setupUser($username)
 	{
 		/** @var User $user */
@@ -49,11 +57,19 @@ class Creator extends AbstractService
 		return $user;
 	}
 
+	/**
+	 * @param string $note
+	 * @return void
+	 */
 	public function setNote($note)
 	{
 		$this->note = (string) $note;
 	}
 
+	/**
+	 * @param User $user
+	 * @return void
+	 */
 	public function setCreatedBy(User $user)
 	{
 		$this->createdByUserId = $user->user_id;
@@ -64,17 +80,26 @@ class Creator extends AbstractService
 	 *
 	 * The record is written here and never through core's administrator controller, whose save
 	 * demands the acting administrator's password - the caller's business, not this service's.
+	 *
+	 * @param bool $admin
+	 * @return void
 	 */
 	public function setAdmin($admin)
 	{
 		$this->admin = (bool) $admin;
 	}
 
+	/**
+	 * @return User
+	 */
 	public function getUser()
 	{
 		return $this->user;
 	}
 
+	/**
+	 * @return array<string, \XF\Phrase|string> errors, keyed by field
+	 */
 	protected function _validate()
 	{
 		$this->user->preSave();
@@ -88,6 +113,9 @@ class Creator extends AbstractService
 		return $errors;
 	}
 
+	/**
+	 * @return \Hampel\ApiUsers\Entity\ApiUser
+	 */
 	protected function _save()
 	{
 		$user = $this->user;

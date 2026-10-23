@@ -9,7 +9,7 @@ class ClassExtensionsTest extends TestCase
 	 * the merge service and the controller, and each must still resolve on 2.3 through core's
 	 * aliases. validate checks four of them; this checks all five, the controller included.
 	 */
-	public function test_every_extension_is_registered_against_the_2_2_name_and_resolves()
+	public function test_every_extension_is_registered_against_the_2_2_name_and_resolves(): void
 	{
 		$resolved = $this->assertAddOnClassExtensionsApply();
 

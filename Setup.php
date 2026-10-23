@@ -13,6 +13,9 @@ class Setup extends AbstractSetup
 	use StepRunnerUpgradeTrait;
 	use StepRunnerUninstallTrait;
 
+	/**
+	 * @return void
+	 */
 	public function installStep1()
 	{
 		$this->schemaManager()->createTable('xf_hampel_apiusers_user', function (Create $table)
@@ -36,6 +39,8 @@ class Setup extends AbstractSetup
 	 * The accounts are found with a plain read and updated by primary key. scheme_class has no
 	 * index, so updating by it scans and locks the whole table, and waits on any row another
 	 * transaction holds.
+	 *
+	 * @return void
 	 */
 	public function uninstallStep1()
 	{
@@ -56,6 +61,9 @@ class Setup extends AbstractSetup
 		}
 	}
 
+	/**
+	 * @return void
+	 */
 	public function uninstallStep2()
 	{
 		$this->schemaManager()->dropTable('xf_hampel_apiusers_user');

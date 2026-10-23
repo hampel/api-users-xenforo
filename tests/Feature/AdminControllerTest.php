@@ -12,6 +12,9 @@ class AdminControllerTest extends TestCase
 	/**
 	 * An administrator holding the given admin permissions, with a password of their own so the
 	 * confirmation can be answered without reading anybody's real one.
+	 *
+	 * @param string[] $permissions
+	 * @return \XF\Entity\User
 	 */
 	private function admin(array $permissions)
 	{
@@ -25,23 +28,36 @@ class AdminControllerTest extends TestCase
 		return $admin;
 	}
 
+	/**
+	 * @param array<string, mixed> $input
+	 * @return \XF\Mvc\Reply\AbstractReply
+	 */
 	private function save(array $input)
 	{
 		return $this->dispatch('api-users/save', 'admin', $input, [], 'POST');
 	}
 
-	/** Core's own wording, so that a test names the guard that refused and not only its code. */
+	/**
+	 * Core's own wording, so that a test names the guard that refused and not only its code.
+	 *
+	 * @param string $name
+	 * @return string
+	 */
 	private function corePhrase($name)
 	{
 		return \XF::phrase($name)->render('raw');
 	}
 
+	/**
+	 * @param string $username
+	 * @return int|false
+	 */
 	private function userIdOf($username)
 	{
 		return $this->app()->db()->fetchOne('SELECT user_id FROM xf_user WHERE username = ?', $username);
 	}
 
-	public function test_every_page_needs_the_manage_api_users_permission()
+	public function test_every_page_needs_the_manage_api_users_permission(): void
 	{
 		// managing users, and even managing administrators, is not enough
 		$this->admin(['user', 'admin']);
@@ -51,7 +67,7 @@ class AdminControllerTest extends TestCase
 		$this->assertReplyIsError($this->save(['username' => $this->uniqueName('acp')]), 403);
 	}
 
-	public function test_the_list_shows_the_api_users_and_their_key_counts()
+	public function test_the_list_shows_the_api_users_and_their_key_counts(): void
 	{
 		$this->admin(['hampelApiUsers']);
 		$user = $this->createApiUser();
@@ -64,14 +80,14 @@ class AdminControllerTest extends TestCase
 		$this->assertArrayNotHasKey($user->user_id, $this->replyParam($reply, 'apiKeyCounts'));
 	}
 
-	public function test_saving_creates_an_api_user_recorded_against_the_acting_administrator()
+	public function test_saving_creates_an_api_user_recorded_against_the_acting_administrator(): void
 	{
 		$admin = $this->admin(['hampelApiUsers']);
 		$name = $this->uniqueName('acp');
 
 		$reply = $this->save(['username' => $name, 'note' => 'made in the control panel']);
 
-		$this->assertReplyIsRedirect($reply);
+		$this->assertInstanceOf(\XF\Mvc\Reply\Redirect::class, $reply);
 		$this->assertStringContainsString($this->app()->router('admin')->buildLink('api-users'), $reply->getUrl());
 		$this->assertStringContainsString($name, (string) $reply->getMessage());
 
@@ -84,7 +100,7 @@ class AdminControllerTest extends TestCase
 		$this->assertFalse($this->app()->db()->fetchOne('SELECT user_id FROM xf_admin WHERE user_id = ?', $userId));
 	}
 
-	public function test_a_name_in_use_is_an_error()
+	public function test_a_name_in_use_is_an_error(): void
 	{
 		$this->admin(['hampelApiUsers']);
 		$existing = $this->createApiUser();
@@ -95,7 +111,7 @@ class AdminControllerTest extends TestCase
 	}
 
 	/** Manage API users must not be a second door to minting administrators. */
-	public function test_making_an_administrator_needs_the_manage_administrators_permission_as_well()
+	public function test_making_an_administrator_needs_the_manage_administrators_permission_as_well(): void
 	{
 		$this->admin(['hampelApiUsers']);
 		$name = $this->uniqueName('acp');
@@ -106,7 +122,7 @@ class AdminControllerTest extends TestCase
 		$this->assertFalse($this->userIdOf($name));
 	}
 
-	public function test_making_an_administrator_needs_the_acting_administrator_password()
+	public function test_making_an_administrator_needs_the_acting_administrator_password(): void
 	{
 		$this->admin(['hampelApiUsers', 'admin']);
 		$name = $this->uniqueName('acp');
@@ -120,7 +136,7 @@ class AdminControllerTest extends TestCase
 		$this->assertFalse($this->userIdOf($name));
 	}
 
-	public function test_with_both_it_creates_an_administrator_holding_no_permissions()
+	public function test_with_both_it_creates_an_administrator_holding_no_permissions(): void
 	{
 		$this->admin(['hampelApiUsers', 'admin']);
 		$name = $this->uniqueName('acp');
@@ -133,7 +149,7 @@ class AdminControllerTest extends TestCase
 		));
 	}
 
-	public function test_converting_needs_the_manage_api_users_permission()
+	public function test_converting_needs_the_manage_api_users_permission(): void
 	{
 		$this->admin(['user']);
 		$member = $this->createMember();
@@ -143,7 +159,7 @@ class AdminControllerTest extends TestCase
 		$this->assertNotSame('', $this->app()->db()->fetchOne('SELECT email FROM xf_user WHERE user_id = ?', $member->user_id));
 	}
 
-	public function test_the_convert_page_asks_first_and_changes_nothing()
+	public function test_the_convert_page_asks_first_and_changes_nothing(): void
 	{
 		$this->admin(['hampelApiUsers']);
 		$member = $this->createMember();
@@ -156,7 +172,7 @@ class AdminControllerTest extends TestCase
 		$this->assertNotSame('', $this->app()->db()->fetchOne('SELECT email FROM xf_user WHERE user_id = ?', $member->user_id));
 	}
 
-	public function test_confirming_converts_the_account_and_records_who_did_it()
+	public function test_confirming_converts_the_account_and_records_who_did_it(): void
 	{
 		$admin = $this->admin(['hampelApiUsers']);
 		$member = $this->createMember();
@@ -171,7 +187,7 @@ class AdminControllerTest extends TestCase
 		$this->assertEquals($admin->user_id, $row['created_by_user_id']);
 	}
 
-	public function test_an_account_with_content_is_shown_why_and_cannot_be_converted()
+	public function test_an_account_with_content_is_shown_why_and_cannot_be_converted(): void
 	{
 		$this->admin(['hampelApiUsers']);
 		$member = $this->createMember();
@@ -187,7 +203,7 @@ class AdminControllerTest extends TestCase
 		$this->assertNotSame('', $this->app()->db()->fetchOne('SELECT email FROM xf_user WHERE user_id = ?', $member->user_id));
 	}
 
-	public function test_only_a_super_administrator_can_convert_a_super_administrator()
+	public function test_only_a_super_administrator_can_convert_a_super_administrator(): void
 	{
 		$this->admin(['hampelApiUsers']);
 		$member = $this->createMember();
@@ -204,7 +220,7 @@ class AdminControllerTest extends TestCase
 	}
 
 	/** Both writes sit behind XenForo's own request check, which a forged form cannot pass. */
-	public function test_neither_write_is_reachable_without_a_csrf_token()
+	public function test_neither_write_is_reachable_without_a_csrf_token(): void
 	{
 		$this->admin(['hampelApiUsers']);
 		$member = $this->createMember();
@@ -221,7 +237,7 @@ class AdminControllerTest extends TestCase
 		$this->assertReplyIsRedirect($this->dispatch('api-users/' . $member->user_id . '/convert', 'admin', [], [], 'POST'));
 	}
 
-	public function test_the_add_form_offers_the_administrator_option_only_to_those_who_may_use_it()
+	public function test_the_add_form_offers_the_administrator_option_only_to_those_who_may_use_it(): void
 	{
 		$this->admin(['hampelApiUsers']);
 		$this->assertFalse($this->replyParam($this->dispatch('api-users/add', 'admin'), 'canMakeAdmin'));

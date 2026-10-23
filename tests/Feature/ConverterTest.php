@@ -7,11 +7,19 @@ class ConverterTest extends TestCase
 {
 	use UsesDatabaseTransactions;
 
+	/**
+	 * @param \XF\Entity\User $user
+	 * @return \Hampel\ApiUsers\Service\ApiUser\Converter
+	 */
 	private function converter($user)
 	{
 		return $this->app()->service('Hampel\ApiUsers:ApiUser\Converter', $user);
 	}
 
+	/**
+	 * @param \XF\Entity\User $user
+	 * @return string
+	 */
 	private function blockerText($user)
 	{
 		return implode(' | ', array_map('strval', $this->converter($user)->getBlockers()));
@@ -20,6 +28,10 @@ class ConverterTest extends TestCase
 	/**
 	 * By the refusal's own wording, since every refusal is a non-empty list and a test that only
 	 * asks for one passes on the wrong reason.
+	 *
+	 * @param string $phrase
+	 * @param \XF\Entity\User $user
+	 * @return void
 	 */
 	private function assertRefusedWith($phrase, $user)
 	{
@@ -29,6 +41,10 @@ class ConverterTest extends TestCase
 		);
 	}
 
+	/**
+	 * @param int $userId
+	 * @return \XF\Entity\User|null
+	 */
 	private function reload($userId)
 	{
 		$this->app()->em()->clearEntityCache();
@@ -36,7 +52,7 @@ class ConverterTest extends TestCase
 		return $this->app()->em()->find('XF:User', $userId);
 	}
 
-	public function test_an_unused_account_is_converted()
+	public function test_an_unused_account_is_converted(): void
 	{
 		$member = $this->createMember();
 		$userId = $member->user_id;
@@ -59,7 +75,7 @@ class ConverterTest extends TestCase
 		));
 	}
 
-	public function test_the_old_password_no_longer_works_and_the_guards_now_apply()
+	public function test_the_old_password_no_longer_works_and_the_guards_now_apply(): void
 	{
 		$member = $this->createMember();
 		$member->Auth->setPassword('the password it used to have');
@@ -77,7 +93,7 @@ class ConverterTest extends TestCase
 	}
 
 	/** A connected account logs its user in whatever the authentication scheme says. */
-	public function test_every_other_way_of_logging_in_is_removed()
+	public function test_every_other_way_of_logging_in_is_removed(): void
 	{
 		$member = $this->createMember();
 		$userId = $member->user_id;
@@ -111,7 +127,7 @@ class ConverterTest extends TestCase
 	 * row, on the account and on a second member who must keep all of them. A count of zero proves
 	 * nothing about a table nobody wrote to.
 	 */
-	public function test_two_step_passkeys_and_oauth_grants_are_removed_and_only_its_own()
+	public function test_two_step_passkeys_and_oauth_grants_are_removed_and_only_its_own(): void
 	{
 		$sm = $this->app()->db()->getSchemaManager();
 		if (!$sm->tableExists('xf_passkey') || !$sm->tableExists('xf_oauth_token'))
@@ -142,6 +158,8 @@ class ConverterTest extends TestCase
 	}
 
 	/**
+	 * @param \XF\Entity\User $user
+	 *
 	 * @return int the OAuth token's id, which its refresh token is keyed on
 	 */
 	private function plantOtherLogins($user)
@@ -178,7 +196,7 @@ class ConverterTest extends TestCase
 	}
 
 	/** A follow names both accounts on each other's public profile, where no listing filter reaches. */
-	public function test_following_and_being_followed_are_both_removed()
+	public function test_following_and_being_followed_are_both_removed(): void
 	{
 		$member = $this->createMember();
 		$other = $this->createMember();
@@ -205,7 +223,7 @@ class ConverterTest extends TestCase
 		$this->assertSame('', (string) $db->fetchOne($following, $other->user_id));
 	}
 
-	public function test_its_api_keys_are_kept()
+	public function test_its_api_keys_are_kept(): void
 	{
 		$member = $this->createMember();
 		$key = $this->app()->em()->create('XF:ApiKey');
@@ -220,7 +238,7 @@ class ConverterTest extends TestCase
 		$this->assertEquals(1, $this->app()->db()->fetchOne('SELECT COUNT(*) FROM xf_api_key WHERE user_id = ?', $member->user_id));
 	}
 
-	public function test_an_administrator_stays_an_administrator_with_its_permissions()
+	public function test_an_administrator_stays_an_administrator_with_its_permissions(): void
 	{
 		$member = $this->createMember();
 		$admin = $this->app()->em()->create('XF:Admin');
@@ -238,7 +256,7 @@ class ConverterTest extends TestCase
 		$this->assertIsApiOnly($userId);
 	}
 
-	public function test_an_account_with_content_is_refused_and_says_where()
+	public function test_an_account_with_content_is_refused_and_says_where(): void
 	{
 		$member = $this->createMember();
 		$this->app()->db()->insert('xf_poll_vote', [
@@ -248,7 +266,7 @@ class ConverterTest extends TestCase
 		$this->assertStringContainsString('xf_poll_vote', $this->blockerText($member));
 	}
 
-	public function test_an_account_with_a_reaction_is_refused()
+	public function test_an_account_with_a_reaction_is_refused(): void
 	{
 		$member = $this->createMember();
 
@@ -264,7 +282,7 @@ class ConverterTest extends TestCase
 	 * A forum's welcome message is a conversation sent to every account that registers. Holding
 	 * one is not having been used; starting one or answering one is.
 	 */
-	public function test_being_sent_a_conversation_is_not_content_and_writing_in_one_is()
+	public function test_being_sent_a_conversation_is_not_content_and_writing_in_one_is(): void
 	{
 		$sender = $this->createMember();
 		$recipient = $this->createMember();
@@ -297,7 +315,7 @@ class ConverterTest extends TestCase
 	}
 
 	/** Logging in, being alerted and being renamed are not content. */
-	public function test_bookkeeping_rows_do_not_count_as_content()
+	public function test_bookkeeping_rows_do_not_count_as_content(): void
 	{
 		$member = $this->createMember();
 		$db = $this->app()->db();
@@ -314,7 +332,7 @@ class ConverterTest extends TestCase
 		$this->assertSame([], $this->converter($member)->getBlockers());
 	}
 
-	public function test_a_table_another_add_on_registers_counts_as_content()
+	public function test_a_table_another_add_on_registers_counts_as_content(): void
 	{
 		$member = $this->createMember();
 
@@ -329,11 +347,14 @@ class ConverterTest extends TestCase
 		$this->assertSame(['xf_user_option'], $converter->getContentTables());
 	}
 
-	public function test_the_content_map_is_core_s_own()
+	public function test_the_content_map_is_core_s_own(): void
 	{
 		$member = $this->createMember();
 
 		$converter = new class($this->app(), $member) extends \Hampel\ApiUsers\Service\ApiUser\Converter {
+			/**
+			 * @return array<string, array<int|string, mixed>>
+			 */
 			public function map()
 			{
 				return $this->getUserContentMap();
@@ -345,7 +366,7 @@ class ConverterTest extends TestCase
 		$this->assertArrayHasKey('xf_conversation_message', $map);
 	}
 
-	public function test_a_banned_or_unconfirmed_account_is_refused()
+	public function test_a_banned_or_unconfirmed_account_is_refused(): void
 	{
 		$member = $this->createMember();
 		$member->user_state = 'email_confirm';
@@ -358,7 +379,7 @@ class ConverterTest extends TestCase
 		$this->assertRefusedWith('hampel_apiusers_convert_blocked_not_valid', $member);
 	}
 
-	public function test_a_moderator_an_api_user_and_your_own_account_are_refused()
+	public function test_a_moderator_an_api_user_and_your_own_account_are_refused(): void
 	{
 		$moderator = $this->createMember();
 		$moderator->is_moderator = true;
@@ -374,7 +395,7 @@ class ConverterTest extends TestCase
 	}
 
 	/** The note is stored in a varchar(255), and the creator refuses the same length. */
-	public function test_a_note_longer_than_the_column_is_refused()
+	public function test_a_note_longer_than_the_column_is_refused(): void
 	{
 		$member = $this->createMember();
 
@@ -389,7 +410,7 @@ class ConverterTest extends TestCase
 		);
 	}
 
-	public function test_convert_refuses_to_run_past_a_blocker()
+	public function test_convert_refuses_to_run_past_a_blocker(): void
 	{
 		$member = $this->createMember();
 		$member->is_banned = true;

@@ -11,7 +11,7 @@ class GuardsTest extends TestCase
 {
 	use UsesDatabaseTransactions;
 
-	public function test_a_password_cannot_be_set()
+	public function test_a_password_cannot_be_set(): void
 	{
 		$user = $this->createApiUser();
 		$auth = $this->app()->em()->find('XF:UserAuth', $user->user_id);
@@ -24,7 +24,7 @@ class GuardsTest extends TestCase
 	}
 
 	/** What Hampel/ArchiveSite does to every account it archives, and core to a connected account. */
-	public function test_it_cannot_be_moved_to_core_passwordless_scheme_either()
+	public function test_it_cannot_be_moved_to_core_passwordless_scheme_either(): void
 	{
 		$user = $this->createApiUser();
 		$auth = $this->app()->em()->find('XF:UserAuth', $user->user_id);
@@ -36,7 +36,7 @@ class GuardsTest extends TestCase
 	}
 
 	/** The route a lost-password confirmation and core's administrator save both take. */
-	public function test_a_password_reset_cannot_give_it_one()
+	public function test_a_password_reset_cannot_give_it_one(): void
 	{
 		$user = $this->createApiUser();
 		$auth = $this->app()->em()->find('XF:UserAuth', $user->user_id);
@@ -47,7 +47,7 @@ class GuardsTest extends TestCase
 		$this->assertIsApiOnly($user->user_id);
 	}
 
-	public function test_an_email_address_cannot_be_set_even_by_an_administrator()
+	public function test_an_email_address_cannot_be_set_even_by_an_administrator(): void
 	{
 		$user = $this->createApiUser();
 		$user->setOption('admin_edit', true);
@@ -59,7 +59,7 @@ class GuardsTest extends TestCase
 		$this->assertSame('', $this->app()->db()->fetchOne('SELECT email FROM xf_user WHERE user_id = ?', $user->user_id));
 	}
 
-	public function test_other_changes_to_an_api_user_still_save()
+	public function test_other_changes_to_an_api_user_still_save(): void
 	{
 		$user = $this->createApiUser();
 
@@ -68,7 +68,7 @@ class GuardsTest extends TestCase
 		$this->assertTrue($user->save(false));
 	}
 
-	public function test_an_ordinary_member_can_change_password_and_email_address()
+	public function test_an_ordinary_member_can_change_password_and_email_address(): void
 	{
 		$member = $this->createMember();
 
@@ -80,7 +80,7 @@ class GuardsTest extends TestCase
 		$this->assertTrue($member->save(false));
 	}
 
-	public function test_nobody_can_log_in_as_an_api_user()
+	public function test_nobody_can_log_in_as_an_api_user(): void
 	{
 		$user = $this->createApiUser();
 
@@ -92,7 +92,7 @@ class GuardsTest extends TestCase
 	}
 
 	/** Core finds the account by email address, and refuses one that has none. */
-	public function test_a_lost_password_request_cannot_be_started()
+	public function test_a_lost_password_request_cannot_be_started(): void
 	{
 		$user = $this->createApiUser();
 

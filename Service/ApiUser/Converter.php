@@ -55,11 +55,19 @@ class Converter extends AbstractService
 		$this->user = $user;
 	}
 
+	/**
+	 * @param string $note
+	 * @return void
+	 */
 	public function setNote($note)
 	{
 		$this->note = (string) $note;
 	}
 
+	/**
+	 * @param \XF\Entity\User $user
+	 * @return void
+	 */
 	public function setCreatedBy(User $user)
 	{
 		$this->createdByUserId = $user->user_id;
@@ -154,7 +162,7 @@ class Converter extends AbstractService
 	 * read by reflection. Asking for the service by its short name fires
 	 * user_content_change_init, which is how add-ons extend the map.
 	 *
-	 * @return array table => column definition(s)
+	 * @return array<string, array<int|string, mixed>> table => column definition(s)
 	 */
 	protected function getUserContentMap()
 	{
@@ -169,6 +177,8 @@ class Converter extends AbstractService
 	/**
 	 * A definition is either one [user id column, username column?] or a list of them, and
 	 * either may carry an 'emptyable' flag that is not a column.
+	 *
+	 * @param array<int|string, mixed> $definition
 	 *
 	 * @return string[]
 	 */
@@ -237,6 +247,9 @@ class Converter extends AbstractService
 		return $apiUser;
 	}
 
+	/**
+	 * @return void
+	 */
 	protected function removeOtherLogins()
 	{
 		$user = $this->user;
@@ -280,6 +293,8 @@ class Converter extends AbstractService
 	 * Following and being followed both put this account's name on another member's public
 	 * profile, where the listing filter does not reach. Each row goes through its entity, which
 	 * rebuilds the cached list on the profile of whoever was following.
+	 *
+	 * @return void
 	 */
 	protected function removeFollows()
 	{

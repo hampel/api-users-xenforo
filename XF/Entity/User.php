@@ -20,6 +20,9 @@ class User extends XFCP_User
 	 * Nobody new follows an API user and an API user follows nobody: a follow puts its name on
 	 * the other member's public profile. Left to core when the follow already exists, since the
 	 * same check guards removing it.
+	 *
+	 * @param \XF\Entity\User $user
+	 * @return bool
 	 */
 	public function canFollowUser(\XF\Entity\User $user)
 	{
@@ -31,6 +34,10 @@ class User extends XFCP_User
 		return parent::canFollowUser($user);
 	}
 
+	/**
+	 * @param mixed $error
+	 * @return bool
+	 */
 	public function canViewFullProfile(&$error = null)
 	{
 		if (!$this->canViewApiUserProfile($error))
@@ -41,6 +48,10 @@ class User extends XFCP_User
 		return parent::canViewFullProfile($error);
 	}
 
+	/**
+	 * @param mixed $error
+	 * @return bool
+	 */
 	public function canViewBasicProfile(&$error = null)
 	{
 		if (!$this->canViewApiUserProfile($error))
@@ -54,6 +65,9 @@ class User extends XFCP_User
 	/**
 	 * An API user is not a member to the public: its profile is for the account itself and for
 	 * staff who can already see past a member's privacy settings.
+	 *
+	 * @param mixed $error
+	 * @return bool
 	 */
 	protected function canViewApiUserProfile(&$error = null)
 	{
@@ -72,6 +86,9 @@ class User extends XFCP_User
 		return false;
 	}
 
+	/**
+	 * @return void
+	 */
 	protected function _preSave()
 	{
 		parent::_preSave();
@@ -84,6 +101,9 @@ class User extends XFCP_User
 		}
 	}
 
+	/**
+	 * @return void
+	 */
 	protected function _postDelete()
 	{
 		parent::_postDelete();

@@ -9,7 +9,9 @@ class Listener
 	 *
 	 * Not a dependency on the Admin API: an event no installed add-on defines is never fired.
 	 *
-	 * @param array $declarations
+	 * @param array<string, mixed> $declarations add-on id => what that add-on declares
+	 *
+	 * @return void
 	 */
 	public static function adminApiRedaction(array &$declarations)
 	{

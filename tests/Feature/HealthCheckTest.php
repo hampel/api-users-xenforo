@@ -19,7 +19,13 @@ class HealthCheckTest extends TestCase
 		$this->setAsideForumApiUsers();
 	}
 
-	/** @phpstan-impure */
+	/**
+	 * Read afresh on each call, so a test can change the forum between two of them.
+	 *
+	 * @phpstan-impure
+	 *
+	 * @return array<string, string> check => status
+	 */
 	private function statuses()
 	{
 		$results = $this->app()->service('Hampel\ApiUsers:HealthCheck')->run();
@@ -27,6 +33,10 @@ class HealthCheckTest extends TestCase
 		return array_column($results, 'status', 'check');
 	}
 
+	/**
+	 * @param string $check
+	 * @return string
+	 */
 	private function detail($check)
 	{
 		$results = $this->app()->service('Hampel\ApiUsers:HealthCheck')->run();
@@ -34,6 +44,11 @@ class HealthCheckTest extends TestCase
 		return array_column($results, 'detail', 'check')[$check];
 	}
 
+	/**
+	 * @param int $userId
+	 * @param bool $active
+	 * @return void
+	 */
 	private function giveKey($userId, $active = true)
 	{
 		$key = $this->app()->em()->create('XF:ApiKey');
@@ -49,6 +64,10 @@ class HealthCheckTest extends TestCase
 		$key->save();
 	}
 
+	/**
+	 * @param bool $admin
+	 * @return \XF\Entity\User
+	 */
 	private function healthyApiUser($admin = false)
 	{
 		$user = $this->createApiUser($admin);
@@ -57,7 +76,7 @@ class HealthCheckTest extends TestCase
 		return $user;
 	}
 
-	public function test_a_forum_with_no_api_users_is_a_warning_not_a_pass()
+	public function test_a_forum_with_no_api_users_is_a_warning_not_a_pass(): void
 	{
 		$statuses = $this->statuses();
 
@@ -66,7 +85,7 @@ class HealthCheckTest extends TestCase
 		$this->assertNotContains(HealthCheck::PROBLEM, $statuses);
 	}
 
-	public function test_a_healthy_api_user_passes_every_check_about_it()
+	public function test_a_healthy_api_user_passes_every_check_about_it(): void
 	{
 		$this->healthyApiUser(true);
 
@@ -76,7 +95,7 @@ class HealthCheckTest extends TestCase
 		$this->assertSame([HealthCheck::OK], array_values(array_unique($statuses)));
 	}
 
-	public function test_an_api_user_moved_off_the_scheme_is_a_problem()
+	public function test_an_api_user_moved_off_the_scheme_is_a_problem(): void
 	{
 		$user = $this->healthyApiUser();
 		$this->app()->db()->update('xf_user_authenticate', ['scheme_class' => 'XF:Core12'], 'user_id = ?', $user->user_id);
@@ -85,7 +104,7 @@ class HealthCheckTest extends TestCase
 		$this->assertStringContainsString($user->username, $this->detail('scheme'));
 	}
 
-	public function test_an_api_user_with_no_authentication_row_is_a_problem()
+	public function test_an_api_user_with_no_authentication_row_is_a_problem(): void
 	{
 		$user = $this->healthyApiUser();
 		$this->app()->db()->delete('xf_user_authenticate', 'user_id = ?', $user->user_id);
@@ -93,7 +112,7 @@ class HealthCheckTest extends TestCase
 		$this->assertSame(HealthCheck::PROBLEM, $this->statuses()['scheme']);
 	}
 
-	public function test_an_account_on_the_scheme_that_is_not_recorded_is_a_problem()
+	public function test_an_account_on_the_scheme_that_is_not_recorded_is_a_problem(): void
 	{
 		$user = $this->healthyApiUser();
 		$this->app()->db()->delete('xf_hampel_apiusers_user', 'user_id = ?', $user->user_id);
@@ -102,7 +121,7 @@ class HealthCheckTest extends TestCase
 		$this->assertStringContainsString($user->username, $this->detail('unrecorded'));
 	}
 
-	public function test_an_api_user_given_an_email_address_is_a_problem()
+	public function test_an_api_user_given_an_email_address_is_a_problem(): void
 	{
 		$user = $this->healthyApiUser();
 		$this->app()->db()->update('xf_user', ['email' => 'slipped@example.invalid'], 'user_id = ?', $user->user_id);
@@ -110,7 +129,7 @@ class HealthCheckTest extends TestCase
 		$this->assertSame(HealthCheck::PROBLEM, $this->statuses()['email']);
 	}
 
-	public function test_an_api_user_with_a_connected_account_is_a_problem()
+	public function test_an_api_user_with_a_connected_account_is_a_problem(): void
 	{
 		$user = $this->healthyApiUser();
 		$this->app()->db()->insert('xf_user_connected_account', [
@@ -121,7 +140,7 @@ class HealthCheckTest extends TestCase
 		$this->assertStringContainsString($user->username, $this->detail('logins'));
 	}
 
-	public function test_an_api_user_in_a_follow_either_way_round_is_a_warning()
+	public function test_an_api_user_in_a_follow_either_way_round_is_a_warning(): void
 	{
 		$this->assertSame(HealthCheck::OK, $this->statuses()['follows']);
 
@@ -137,7 +156,7 @@ class HealthCheckTest extends TestCase
 		$this->assertStringContainsString($followed->username, $this->detail('follows'));
 	}
 
-	public function test_a_user_edit_modification_that_stops_matching_is_a_warning()
+	public function test_a_user_edit_modification_that_stops_matching_is_a_warning(): void
 	{
 		$this->assertSame(HealthCheck::OK, $this->statuses()['modifications']);
 
@@ -150,7 +169,7 @@ class HealthCheckTest extends TestCase
 		$this->assertStringContainsString('hampelApiUsersUserEditEmail', $this->detail('modifications'));
 	}
 
-	public function test_an_add_on_with_no_modifications_registered_is_a_warning()
+	public function test_an_add_on_with_no_modifications_registered_is_a_warning(): void
 	{
 		$db = $this->app()->db();
 		$ids = $db->fetchAllColumn('SELECT modification_id FROM xf_template_modification WHERE addon_id = ?', 'Hampel/ApiUsers');
@@ -165,14 +184,14 @@ class HealthCheckTest extends TestCase
 	}
 
 	/** The control panel lists API users on purpose, so the listing check has nothing to prove there. */
-	public function test_the_listing_check_is_skipped_in_the_control_panel()
+	public function test_the_listing_check_is_skipped_in_the_control_panel(): void
 	{
 		$this->setAppClassType('admin');
 
 		$this->assertSame(HealthCheck::SKIPPED, $this->statuses()['listings']);
 	}
 
-	public function test_a_banned_or_invalid_api_user_is_a_warning()
+	public function test_a_banned_or_invalid_api_user_is_a_warning(): void
 	{
 		$user = $this->healthyApiUser();
 		$db = $this->app()->db();
@@ -184,7 +203,7 @@ class HealthCheckTest extends TestCase
 		$this->assertSame(HealthCheck::WARNING, $this->statuses()['state']);
 	}
 
-	public function test_an_administrator_flag_with_no_administrator_record_is_a_problem()
+	public function test_an_administrator_flag_with_no_administrator_record_is_a_problem(): void
 	{
 		$user = $this->healthyApiUser(true);
 		$this->app()->db()->delete('xf_admin', 'user_id = ?', $user->user_id);
@@ -192,7 +211,7 @@ class HealthCheckTest extends TestCase
 		$this->assertSame(HealthCheck::PROBLEM, $this->statuses()['admins']);
 	}
 
-	public function test_an_api_user_with_no_active_key_is_a_warning()
+	public function test_an_api_user_with_no_active_key_is_a_warning(): void
 	{
 		$user = $this->createApiUser();
 		$this->assertSame(HealthCheck::WARNING, $this->statuses()['keys']);
@@ -204,7 +223,7 @@ class HealthCheckTest extends TestCase
 		$this->assertSame(HealthCheck::OK, $this->statuses()['keys']);
 	}
 
-	public function test_a_record_whose_account_is_gone_is_a_warning()
+	public function test_a_record_whose_account_is_gone_is_a_warning(): void
 	{
 		$this->app()->db()->insert('xf_hampel_apiusers_user', ['user_id' => 2147480000, 'created_date' => 1]);
 
@@ -212,7 +231,7 @@ class HealthCheckTest extends TestCase
 		$this->assertStringContainsString('2147480000', $this->detail('accounts'));
 	}
 
-	public function test_a_missing_table_is_a_problem_and_does_not_end_the_run()
+	public function test_a_missing_table_is_a_problem_and_does_not_end_the_run(): void
 	{
 		$this->fakesErrors();
 
@@ -227,7 +246,7 @@ class HealthCheckTest extends TestCase
 		$this->assertSame(HealthCheck::PROBLEM, $statuses['table']);
 	}
 
-	public function test_a_check_that_throws_is_a_problem_logged_with_the_add_on_prefix()
+	public function test_a_check_that_throws_is_a_problem_logged_with_the_add_on_prefix(): void
 	{
 		$this->fakesErrors();
 
@@ -245,7 +264,7 @@ class HealthCheckTest extends TestCase
 		$this->assertExceptionLogged(\RuntimeException::class, HealthCheck::ERROR_LOG_PREFIX);
 	}
 
-	public function test_archive_site_is_skipped_where_it_is_not_installed()
+	public function test_archive_site_is_skipped_where_it_is_not_installed(): void
 	{
 		$this->healthyApiUser();
 
@@ -259,7 +278,7 @@ class HealthCheckTest extends TestCase
 		$this->assertSame(HealthCheck::SKIPPED, array_column($check->run(), 'status', 'check')['archive']);
 	}
 
-	public function test_an_api_user_missing_from_the_archive_protected_list_is_a_warning()
+	public function test_an_api_user_missing_from_the_archive_protected_list_is_a_warning(): void
 	{
 		$user = $this->healthyApiUser();
 
@@ -279,7 +298,7 @@ class HealthCheckTest extends TestCase
 		$this->assertSame(HealthCheck::OK, $statuses['archive']);
 	}
 
-	public function test_the_older_flat_archive_key_is_honoured_too()
+	public function test_the_older_flat_archive_key_is_honoured_too(): void
 	{
 		$user = $this->healthyApiUser();
 

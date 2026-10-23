@@ -14,6 +14,9 @@ class User extends XFCP_User
 	 * Registered above the default execute_order on purpose. An extension of this method that
 	 * replaces it without calling the parent discards every condition added inside it, so this
 	 * one has to be outside.
+	 *
+	 * @param bool $recentlyActive
+	 * @return $this
 	 */
 	public function isValidUser($recentlyActive = false)
 	{

@@ -12,6 +12,10 @@
  */
 class Merge extends XFCP_Merge
 {
+	/**
+	 * @param int $maxRunTime
+	 * @return \XF\ContinuationResult
+	 */
 	public function merge($maxRunTime = 0)
 	{
 		// set by setSource() and setTarget(), not the constructor, so either can still be null

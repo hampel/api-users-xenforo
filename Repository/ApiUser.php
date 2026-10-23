@@ -31,6 +31,9 @@ class ApiUser extends Repository
 	 *
 	 * The one definition, used when an API user is created and when an existing account is
 	 * converted, so the two cannot drift apart.
+	 *
+	 * @param \XF\Entity\User $user
+	 * @return void
 	 */
 	public function applyApiUserShape(\XF\Entity\User $user)
 	{
@@ -63,7 +66,7 @@ class ApiUser extends Repository
 	 *
 	 * @param int[] $userIds
 	 *
-	 * @return array user_id => count
+	 * @return array<int, int> user_id => count
 	 */
 	public function countApiKeysByUser(array $userIds)
 	{
@@ -74,11 +77,11 @@ class ApiUser extends Repository
 
 		$db = $this->db();
 
-		return $db->fetchPairs('
+		return array_map('intval', $db->fetchPairs('
 			SELECT user_id, COUNT(*)
 			FROM xf_api_key
 			WHERE user_id IN (' . $db->quote($userIds) . ')
 			GROUP BY user_id
-		');
+		'));
 	}
 }

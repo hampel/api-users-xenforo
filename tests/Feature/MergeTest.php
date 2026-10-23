@@ -13,6 +13,11 @@ class MergeTest extends TestCase
 
 	private const REFUSED = 'An API user cannot be merged with another account, in either direction.';
 
+	/**
+	 * @param \XF\Entity\User $source
+	 * @param \XF\Entity\User $target
+	 * @return \XF\ContinuationResult
+	 */
 	private function merge($source, $target)
 	{
 		/** @var \XF\Service\User\Merge $merger */
@@ -22,22 +27,29 @@ class MergeTest extends TestCase
 		return $merger->merge();
 	}
 
+	/**
+	 * @param int $userId
+	 * @return bool
+	 */
 	private function exists($userId)
 	{
 		return (bool) $this->app()->db()->fetchOne('SELECT 1 FROM xf_user WHERE user_id = ?', $userId);
 	}
 
+	/**
+	 * @return int
+	 */
 	private function mergeJobs()
 	{
 		return (int) $this->app()->db()->fetchOne("SELECT COUNT(*) FROM xf_job WHERE unique_key LIKE 'userMerge%'");
 	}
 
-	public function test_the_merge_service_is_this_add_on_s()
+	public function test_the_merge_service_is_this_add_on_s(): void
 	{
 		$this->assertInstanceOf(\Hampel\ApiUsers\XF\Service\User\Merge::class, $this->app()->service('XF:User\Merge'));
 	}
 
-	public function test_an_api_user_is_not_merged_into_a_member()
+	public function test_an_api_user_is_not_merged_into_a_member(): void
 	{
 		$this->fakesErrors();
 		$apiUser = $this->createApiUser();
@@ -52,7 +64,7 @@ class MergeTest extends TestCase
 		$this->assertExceptionLogged(\ErrorException::class, 'ApiUsers: Refused to merge');
 	}
 
-	public function test_a_member_is_not_merged_into_an_api_user()
+	public function test_a_member_is_not_merged_into_an_api_user(): void
 	{
 		$this->fakesErrors();
 		$apiUser = $this->createApiUser();
@@ -72,7 +84,7 @@ class MergeTest extends TestCase
 	}
 
 	/** The control: core's merge is otherwise left alone, and this suite can tell. */
-	public function test_two_ordinary_members_still_merge()
+	public function test_two_ordinary_members_still_merge(): void
 	{
 		$source = $this->createMember();
 		$target = $this->createMember();
@@ -82,7 +94,7 @@ class MergeTest extends TestCase
 		$this->assertTrue($this->exists($target->user_id));
 	}
 
-	public function test_the_merge_form_is_refused_for_an_api_user_with_the_reason()
+	public function test_the_merge_form_is_refused_for_an_api_user_with_the_reason(): void
 	{
 		$this->actingAsAdministrator(['user' => true]);
 		$apiUser = $this->createApiUser();
@@ -96,7 +108,7 @@ class MergeTest extends TestCase
 		$this->assertSame(0, $this->mergeJobs());
 	}
 
-	public function test_naming_an_api_user_as_the_target_is_refused_and_queues_nothing()
+	public function test_naming_an_api_user_as_the_target_is_refused_and_queues_nothing(): void
 	{
 		$this->actingAsAdministrator(['user' => true]);
 		$apiUser = $this->createApiUser();
@@ -109,7 +121,7 @@ class MergeTest extends TestCase
 	}
 
 	/** The control for the two above: the form and its job are untouched between members. */
-	public function test_the_merge_form_still_works_between_two_members()
+	public function test_the_merge_form_still_works_between_two_members(): void
 	{
 		$this->actingAsAdministrator(['user' => true]);
 		$source = $this->createMember();

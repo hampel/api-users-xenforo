@@ -35,6 +35,9 @@ abstract class TestCase extends BaseTestCase
 	 * An API user made the way both interfaces make one. Tests using this need
 	 * UsesDatabaseTransactions: the account is real and is rolled back.
 	 *
+	 * @param bool $admin
+	 * @param string $note
+	 *
 	 * @return \XF\Entity\User
 	 */
 	protected function createApiUser($admin = false, $note = '')
@@ -72,6 +75,8 @@ abstract class TestCase extends BaseTestCase
 	 * aside for the length of its transaction. Needs UsesDatabaseTransactions. By primary key
 	 * only: this database is shared with other add-ons' suites running at the same time, and an
 	 * update that scans xf_user_authenticate waits on every row one of them has locked.
+	 *
+	 * @return void
 	 */
 	protected function setAsideForumApiUsers()
 	{
@@ -84,11 +89,19 @@ abstract class TestCase extends BaseTestCase
 		}
 	}
 
+	/**
+	 * @param string $kind
+	 * @return string
+	 */
 	protected function uniqueName($kind)
 	{
 		return 'apiusers_' . $kind . '_' . bin2hex(random_bytes(4));
 	}
 
+	/**
+	 * @param int $userId
+	 * @return string|false
+	 */
 	protected function schemeOf($userId)
 	{
 		return $this->app()->db()->fetchOne(
@@ -96,6 +109,10 @@ abstract class TestCase extends BaseTestCase
 		);
 	}
 
+	/**
+	 * @param int $userId
+	 * @return void
+	 */
 	protected function assertIsApiOnly($userId)
 	{
 		$this->assertSame(ApiOnly::NAME, $this->schemeOf($userId));

@@ -5,11 +5,19 @@ use XF\Mvc\ParameterBag;
 
 class ApiUser extends AbstractController
 {
+	/**
+	 * @param string $action
+	 * @param ParameterBag $params
+	 * @return void
+	 */
 	protected function preDispatchController($action, ParameterBag $params)
 	{
 		$this->assertAdminPermission('hampelApiUsers');
 	}
 
+	/**
+	 * @return \XF\Mvc\Reply\AbstractReply
+	 */
 	public function actionIndex()
 	{
 		$page = $this->filterPage();
@@ -32,6 +40,9 @@ class ApiUser extends AbstractController
 		return $this->view('Hampel\ApiUsers:ApiUser\Listing', 'hampel_apiusers_list', $viewParams);
 	}
 
+	/**
+	 * @return \XF\Mvc\Reply\AbstractReply
+	 */
 	public function actionAdd()
 	{
 		$viewParams = [
@@ -40,6 +51,9 @@ class ApiUser extends AbstractController
 		return $this->view('Hampel\ApiUsers:ApiUser\Add', 'hampel_apiusers_add', $viewParams);
 	}
 
+	/**
+	 * @return \XF\Mvc\Reply\AbstractReply
+	 */
 	public function actionSave()
 	{
 		$this->assertPostOnly();
@@ -84,6 +98,10 @@ class ApiUser extends AbstractController
 		);
 	}
 
+	/**
+	 * @param ParameterBag $params
+	 * @return \XF\Mvc\Reply\AbstractReply
+	 */
 	public function actionConvert(ParameterBag $params)
 	{
 		/** @var \XF\Entity\User $user */

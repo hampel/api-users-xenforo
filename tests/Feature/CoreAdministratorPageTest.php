@@ -16,6 +16,9 @@ class CoreAdministratorPageTest extends TestCase
 
 	private const PASSWORD = 'the acting administrator password';
 
+	/**
+	 * @return \XF\Entity\User
+	 */
 	private function actingAsSuperAdmin()
 	{
 		$admin = $this->actingAsAdministrator([], ['is_super_admin' => true]);
@@ -28,6 +31,11 @@ class CoreAdministratorPageTest extends TestCase
 		return $admin;
 	}
 
+	/**
+	 * @param int $userId
+	 * @param string[] $permissions admin permission ids
+	 * @return \XF\Mvc\Reply\AbstractReply
+	 */
 	private function saveAdministrator($userId, array $permissions)
 	{
 		return $this->dispatch('admins/' . $userId . '/save', 'admin', [
@@ -37,7 +45,7 @@ class CoreAdministratorPageTest extends TestCase
 		], [], 'POST');
 	}
 
-	public function test_granting_permissions_on_core_page_leaves_it_api_only_and_sends_no_mail()
+	public function test_granting_permissions_on_core_page_leaves_it_api_only_and_sends_no_mail(): void
 	{
 		$this->fakesMail();
 		$this->actingAsSuperAdmin();
@@ -60,7 +68,7 @@ class CoreAdministratorPageTest extends TestCase
 	}
 
 	/** An API user that is not yet an administrator, added as one through core's own form. */
-	public function test_adding_an_api_user_as_an_administrator_on_core_page_leaves_it_api_only()
+	public function test_adding_an_api_user_as_an_administrator_on_core_page_leaves_it_api_only(): void
 	{
 		$this->fakesMail();
 		$this->actingAsSuperAdmin();

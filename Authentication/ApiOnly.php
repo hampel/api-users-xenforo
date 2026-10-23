@@ -19,6 +19,10 @@ class ApiOnly extends AbstractAuth
 {
 	const NAME = 'Hampel\ApiUsers:ApiOnly';
 
+	/**
+	 * @param string $password
+	 * @return array<string, mixed> nothing: there is no password to keep
+	 */
 	public function generate($password)
 	{
 		return [];

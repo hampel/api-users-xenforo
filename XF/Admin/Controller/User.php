@@ -8,6 +8,10 @@ use XF\Mvc\ParameterBag;
  */
 class User extends XFCP_User
 {
+	/**
+	 * @param ParameterBag $params
+	 * @return \XF\Mvc\Reply\AbstractReply
+	 */
 	public function actionMerge(ParameterBag $params)
 	{
 		$user = $this->assertUserExists($params->user_id);

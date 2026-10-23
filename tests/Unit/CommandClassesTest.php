@@ -11,7 +11,7 @@ use Tests\TestCase;
  */
 class CommandClassesTest extends TestCase
 {
-	public function test_every_command_class_is_one_xenforo_can_load()
+	public function test_every_command_class_is_one_xenforo_can_load(): void
 	{
 		$classes = $this->assertConsoleCommandsLoad();
 
@@ -19,7 +19,7 @@ class CommandClassesTest extends TestCase
 		$this->assertSame([Create::class, ListUsers::class, Validate::class], $classes);
 	}
 
-	public function test_no_command_depends_on_a_base_class_missing_from_xenforo_2_2()
+	public function test_no_command_depends_on_a_base_class_missing_from_xenforo_2_2(): void
 	{
 		$offenders = [];
 		foreach ($this->assertConsoleCommandsLoad() AS $class)
@@ -34,7 +34,7 @@ class CommandClassesTest extends TestCase
 	}
 
 	/** Command::run() is public and final in effect: a helper of that name breaks the class. */
-	public function test_no_command_redefines_run()
+	public function test_no_command_redefines_run(): void
 	{
 		$offenders = [];
 		foreach ($this->assertConsoleCommandsLoad() AS $class)
@@ -48,7 +48,7 @@ class CommandClassesTest extends TestCase
 		$this->assertSame([], $offenders);
 	}
 
-	public function test_every_error_log_call_carries_the_add_on_prefix()
+	public function test_every_error_log_call_carries_the_add_on_prefix(): void
 	{
 		$offenders = [];
 		$root = dirname(__DIR__, 2);

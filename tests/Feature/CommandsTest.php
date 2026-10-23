@@ -18,7 +18,7 @@ class CommandsTest extends TestCase
 	{
 		$userId = $this->app()->db()->fetchOne('SELECT user_id FROM xf_user WHERE username = ?', $username);
 
-		return $userId === false ? false : (int) $userId;
+		return $userId === false ? false : $this->asInt($userId);
 	}
 
 	public function test_create_makes_an_api_user(): void

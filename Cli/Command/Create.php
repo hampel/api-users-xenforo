@@ -49,13 +49,13 @@ class Create extends Command
 			return 1;
 		}
 
-		$apiUser = $creator->save();
+		$creator->save();
 		$user = $creator->getUser();
 
 		$output->writeln(sprintf(
 			'Created API user <info>%s</info> (user_id %d)%s.',
 			$user->username,
-			$apiUser->user_id,
+			$user->user_id,
 			$input->getOption('admin') ? ', an administrator with no admin permissions' : ''
 		));
 		$output->writeln('It can do nothing until an API key names it: create one under Setup > API keys.');

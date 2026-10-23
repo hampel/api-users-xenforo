@@ -56,7 +56,7 @@ class AdminControllerTest extends TestCase
 	{
 		$userId = $this->app()->db()->fetchOne('SELECT user_id FROM xf_user WHERE username = ?', $username);
 
-		return $userId === false ? false : (int) $userId;
+		return $userId === false ? false : $this->asInt($userId);
 	}
 
 	public function test_every_page_needs_the_manage_api_users_permission(): void
@@ -94,13 +94,14 @@ class AdminControllerTest extends TestCase
 
 		$this->assertReplyIsRedirect($reply);
 		$this->assertStringContainsString($this->app()->router('admin')->buildLink('api-users'), $reply->getUrl());
-		$this->assertStringContainsString($name, (string) $reply->getMessage());
+		$this->assertStringContainsString($name, $this->asText($reply->getMessage()));
 
 		$userId = $this->userIdOf($name);
 		$this->assertNotFalse($userId, 'No account was made');
 		$this->assertIsApiOnly($userId);
 
 		$row = $this->app()->db()->fetchRow('SELECT * FROM xf_hampel_apiusers_user WHERE user_id = ?', $userId);
+		$this->assertIsArray($row);
 		$this->assertSame('made in the control panel', $row['note']);
 		$this->assertEquals($admin->user_id, $row['created_by_user_id']);
 		$this->assertFalse($this->app()->db()->fetchOne('SELECT user_id FROM xf_admin WHERE user_id = ?', $userId));
@@ -188,6 +189,7 @@ class AdminControllerTest extends TestCase
 		$this->assertIsApiOnly($this->idOf($member));
 
 		$row = $this->app()->db()->fetchRow('SELECT * FROM xf_hampel_apiusers_user WHERE user_id = ?', $member->user_id);
+		$this->assertIsArray($row);
 		$this->assertSame('the old bot', $row['note']);
 		$this->assertEquals($admin->user_id, $row['created_by_user_id']);
 	}

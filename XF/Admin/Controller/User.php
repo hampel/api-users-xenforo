@@ -14,6 +14,9 @@ class User extends XFCP_User
 	 */
 	public function actionMerge(ParameterBag $params)
 	{
+		// a route parameter is untyped, and core documents the id as a string; core's own
+		// actionMerge() makes this same call
+		// @phpstan-ignore argument.type
 		$user = $this->assertUserExists($params->user_id);
 		if ($user->isApiUser())
 		{

@@ -83,7 +83,7 @@ vendor/bin/xenforo-phpstan generate           # once per forum, and after a XenF
 vendor/bin/phpstan analyse --memory-limit=1G
 ```
 
-**Level 9, with no errors and no baseline**, since 2026-10-23, through `hampel/xenforo-phpstan`.
+**Level max, with no errors and no baseline**, since 2026-10-23, through `hampel/xenforo-phpstan`.
 Run it from this directory with this add-on's own `vendor/bin/phpstan`. `generate` writes into the
 forum's `internal_data/phpstan/`, not into this repository, and a stale set fails loudly.
 
@@ -107,7 +107,15 @@ forum's `internal_data/phpstan/`, not into this repository, and a stale set fail
   `is_string()`, which its definition already guarantees.
   Core's content map, read by reflection, is checked entry by entry, and a malformed one throws:
   skipping an entry would count its table as holding no content and let a used account convert.
-- **Level max is the next step**: 129 errors on that date, 40 in the tests.
+- **Most of level max was XenForo's own missing types, not this add-on's.** Undeclared returns,
+  the database adapter's fetches and the entity relation methods were restated in the package's
+  stubs on the same day, from 0.7.1 to 0.8.1, and the add-on was not changed to work round them.
+  What was left was the add-on's: typed `HealthCheck` constants, database values read through
+  `text()` and `number()`, and in the tests `asText()`, `asInt()` and a found row asserted before
+  it is read.
+- **One report is ignored by identifier**, besides the merge guard: core documents
+  `assertUserExists()`'s id as a string, and a route parameter is untyped, so the call core itself
+  makes in `actionMerge()` cannot satisfy it.
 
 **One report needed a change to the code rather than to the configuration.** The four `instanceof`
 tests in `HealthCheck::checkExtensions()` read as always true, because the analysis types what the

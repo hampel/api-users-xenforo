@@ -88,7 +88,7 @@ class GuardsTest extends TestCase
 		$login = $this->app()->service('XF:User\Login', $user->username, '192.0.2.10');
 
 		$this->assertNull($login->validate('anything at all', $error));
-		$this->assertNotEmpty((string) $error);
+		$this->assertNotEmpty($this->asText($error));
 	}
 
 	/** Core finds the account by email address, and refuses one that has none. */

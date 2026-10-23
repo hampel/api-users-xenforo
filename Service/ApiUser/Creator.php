@@ -99,7 +99,7 @@ class Creator extends AbstractService
 	}
 
 	/**
-	 * @return array<string, \XF\Phrase|string> errors, keyed by field
+	 * @return array<int|string, \XF\Phrase|string> errors, keyed by field where there is one
 	 */
 	protected function _validate()
 	{

@@ -41,7 +41,7 @@ class MergeTest extends TestCase
 	 */
 	private function mergeJobs()
 	{
-		return (int) $this->app()->db()->fetchOne("SELECT COUNT(*) FROM xf_job WHERE unique_key LIKE 'userMerge%'");
+		return $this->asInt($this->app()->db()->fetchOne("SELECT COUNT(*) FROM xf_job WHERE unique_key LIKE 'userMerge%'"));
 	}
 
 	public function test_the_merge_service_is_this_add_on_s(): void

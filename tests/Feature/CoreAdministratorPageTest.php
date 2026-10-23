@@ -61,9 +61,9 @@ class CoreAdministratorPageTest extends TestCase
 		));
 
 		// and the edit itself took: this is the route by which it gets its permissions
-		$granted = json_decode($this->app()->db()->fetchOne(
+		$granted = json_decode($this->asText($this->app()->db()->fetchOne(
 			'SELECT permission_cache FROM xf_admin WHERE user_id = ?', $user->user_id
-		), true);
+		)), true);
 		$this->assertSame(['viewLogs' => true, 'viewStatistics' => true], $granted);
 	}
 

@@ -77,11 +77,17 @@ class ApiUser extends Repository
 
 		$db = $this->db();
 
-		return array_map('intval', $db->fetchPairs('
+		$counts = [];
+		foreach ($db->fetchPairs('
 			SELECT user_id, COUNT(*)
 			FROM xf_api_key
 			WHERE user_id IN (' . $db->quote($userIds) . ')
 			GROUP BY user_id
-		'));
+		') AS $userId => $count)
+		{
+			$counts[(int) $userId] = is_numeric($count) ? (int) $count : 0;
+		}
+
+		return $counts;
 	}
 }

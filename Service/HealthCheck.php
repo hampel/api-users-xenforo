@@ -192,7 +192,7 @@ class HealthCheck extends AbstractService
 			GROUP BY m.modification_id
 		', 'Hampel/ApiUsers');
 
-		if (!is_array($mods) || !$mods)
+		if (!$mods)
 		{
 			return [static::WARNING, 'None registered: the user edit page neither marks an API user nor offers to convert one.'];
 		}
@@ -200,11 +200,6 @@ class HealthCheck extends AbstractService
 		$dead = [];
 		foreach ($mods AS $mod)
 		{
-			if (!is_array($mod))
-			{
-				continue;
-			}
-
 			if (empty($mod['enabled']) || empty($mod['applied']))
 			{
 				$dead[] = $this->text($mod['modification_key'] ?? '');
@@ -485,7 +480,7 @@ class HealthCheck extends AbstractService
 			ORDER BY user.username
 		');
 
-		if (is_array($unprotected) && $unprotected)
+		if ($unprotected)
 		{
 			$list = [];
 			foreach ($unprotected AS $userId => $username)

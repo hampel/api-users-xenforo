@@ -71,6 +71,35 @@ abstract class TestCase extends BaseTestCase
 	}
 
 	/**
+	 * A database value a test reads as text.
+	 *
+	 * @param mixed $value
+	 *
+	 * @return string
+	 */
+	protected function asText($value)
+	{
+		$this->assertTrue(is_scalar($value) || $value === null || $value instanceof \Stringable,
+			'Expected a value that reads as text, got ' . get_debug_type($value));
+
+		return (string) $value;
+	}
+
+	/**
+	 * A database value a test reads as a number: a count, or an id.
+	 *
+	 * @param mixed $value
+	 *
+	 * @return int
+	 */
+	protected function asInt($value)
+	{
+		$this->assertIsNumeric($value);
+
+		return (int) $value;
+	}
+
+	/**
 	 * A saved user's id. XenForo types it int|null, since a user not yet saved has none.
 	 *
 	 * @param \XF\Entity\User $user
@@ -143,13 +172,13 @@ abstract class TestCase extends BaseTestCase
 
 	/**
 	 * @param int $userId
-	 * @return string|false
+	 * @return string empty when the account has no authentication record
 	 */
 	protected function schemeOf($userId)
 	{
-		return $this->app()->db()->fetchOne(
+		return $this->asText($this->app()->db()->fetchOne(
 			'SELECT scheme_class FROM xf_user_authenticate WHERE user_id = ?', $userId
-		);
+		));
 	}
 
 	/**

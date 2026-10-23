@@ -63,6 +63,7 @@ class ConverterTest extends TestCase
 		$converter->convert();
 
 		$row = $this->app()->db()->fetchRow('SELECT * FROM xf_user WHERE user_id = ?', $userId);
+		$this->assertIsArray($row);
 		$this->assertSame('', $row['email']);
 		$this->assertSame('valid', $row['user_state']);
 		$this->assertEquals(0, $row['visible']);
@@ -198,7 +199,7 @@ class ConverterTest extends TestCase
 			'issue_date' => 1, 'expiry_date' => 2147483000,
 		]);
 
-		return $tokenId;
+		return $this->asInt($tokenId);
 	}
 
 	/** A follow names both accounts on each other's public profile, where no listing filter reaches. */
@@ -217,7 +218,7 @@ class ConverterTest extends TestCase
 
 		$db = $this->app()->db();
 		$following = 'SELECT following FROM xf_user_profile WHERE user_id = ?';
-		$this->assertSame((string) $member->user_id, (string) $db->fetchOne($following, $other->user_id));
+		$this->assertSame((string) $member->user_id, $this->asText($db->fetchOne($following, $other->user_id)));
 
 		$this->converter($this->reload($this->idOf($member)))->convert();
 
@@ -226,7 +227,7 @@ class ConverterTest extends TestCase
 		));
 
 		// and the other member's own cached list, which is what its profile page reads
-		$this->assertSame('', (string) $db->fetchOne($following, $other->user_id));
+		$this->assertSame('', $this->asText($db->fetchOne($following, $other->user_id)));
 	}
 
 	public function test_its_api_keys_are_kept(): void
@@ -256,9 +257,9 @@ class ConverterTest extends TestCase
 		$this->assertSame([], $this->converter($user)->getBlockers());
 		$this->converter($user)->convert();
 
-		$this->assertSame(['viewLogs' => true], json_decode($this->app()->db()->fetchOne(
+		$this->assertSame(['viewLogs' => true], json_decode($this->asText($this->app()->db()->fetchOne(
 			'SELECT permission_cache FROM xf_admin WHERE user_id = ?', $userId
-		), true));
+		)), true));
 		$this->assertIsApiOnly($userId);
 	}
 

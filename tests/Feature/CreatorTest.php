@@ -12,6 +12,7 @@ class CreatorTest extends TestCase
 		$user = $this->createApiUser(false, 'for the monitor');
 
 		$row = $this->app()->db()->fetchRow('SELECT * FROM xf_user WHERE user_id = ?', $user->user_id);
+		$this->assertIsArray($row);
 
 		$this->assertSame('', $row['email']);
 		$this->assertSame('valid', $row['user_state']);
@@ -29,9 +30,10 @@ class CreatorTest extends TestCase
 		$creator->setNote('for the monitor');
 		$creator->setCreatedBy($actor);
 		$this->assertTrue($creator->validate($errors));
-		$apiUser = $creator->save();
+		$creator->save();
 
-		$row = $this->app()->db()->fetchRow('SELECT * FROM xf_hampel_apiusers_user WHERE user_id = ?', $apiUser->user_id);
+		$row = $this->app()->db()->fetchRow('SELECT * FROM xf_hampel_apiusers_user WHERE user_id = ?', $this->idOf($creator->getUser()));
+		$this->assertIsArray($row);
 
 		$this->assertSame('for the monitor', $row['note']);
 		$this->assertEquals(987651, $row['created_by_user_id']);
@@ -44,7 +46,9 @@ class CreatorTest extends TestCase
 		$user = $this->createApiUser();
 
 		$row = $this->app()->db()->fetchRow('SELECT visible, activity_visible FROM xf_user WHERE user_id = ?', $user->user_id);
+		$this->assertIsArray($row);
 		$privacy = $this->app()->db()->fetchRow('SELECT * FROM xf_user_privacy WHERE user_id = ?', $user->user_id);
+		$this->assertIsArray($privacy);
 
 		$this->assertEquals(0, $row['visible']);
 		$this->assertEquals(0, $row['activity_visible']);
@@ -65,10 +69,11 @@ class CreatorTest extends TestCase
 		$db = $this->app()->db();
 
 		$admin = $db->fetchRow('SELECT * FROM xf_admin WHERE user_id = ?', $user->user_id);
+		$this->assertIsArray($admin);
 
 		$this->assertNotEmpty($admin);
 		$this->assertEquals(0, $admin['is_super_admin']);
-		$this->assertSame([], json_decode($admin['permission_cache'], true));
+		$this->assertSame([], json_decode($this->asText($admin['permission_cache']), true));
 		$this->assertEquals(0, $db->fetchOne('SELECT COUNT(*) FROM xf_admin_permission_entry WHERE user_id = ?', $user->user_id));
 		$this->assertEquals(1, $db->fetchOne('SELECT is_admin FROM xf_user WHERE user_id = ?', $user->user_id));
 

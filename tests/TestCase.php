@@ -67,6 +67,23 @@ abstract class TestCase extends BaseTestCase
 		return $user;
 	}
 
+	/**
+	 * The forum's own API users are not the suite's business, so a test that counts them sets them
+	 * aside for the length of its transaction. Needs UsesDatabaseTransactions. By primary key
+	 * only: this database is shared with other add-ons' suites running at the same time, and an
+	 * update that scans xf_user_authenticate waits on every row one of them has locked.
+	 */
+	protected function setAsideForumApiUsers()
+	{
+		$db = $this->app()->db();
+		$userIds = $db->fetchAllColumn('SELECT user_id FROM xf_hampel_apiusers_user');
+		foreach ($userIds AS $userId)
+		{
+			$db->update('xf_user_authenticate', ['scheme_class' => 'XF:NoPassword'], 'user_id = ?', $userId);
+			$db->delete('xf_hampel_apiusers_user', 'user_id = ?', $userId);
+		}
+	}
+
 	protected function uniqueName($kind)
 	{
 		return 'apiusers_' . $kind . '_' . bin2hex(random_bytes(4));

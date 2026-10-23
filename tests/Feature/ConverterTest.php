@@ -17,6 +17,18 @@ class ConverterTest extends TestCase
 		return implode(' | ', array_map('strval', $this->converter($user)->getBlockers()));
 	}
 
+	/**
+	 * By the refusal's own wording, since every refusal is a non-empty list and a test that only
+	 * asks for one passes on the wrong reason.
+	 */
+	private function assertRefusedWith($phrase, $user)
+	{
+		$this->assertContains(
+			(string) \XF::phrase($phrase),
+			array_map('strval', $this->converter($user)->getBlockers())
+		);
+	}
+
 	private function reload($userId)
 	{
 		$this->app()->em()->clearEntityCache();
@@ -92,6 +104,77 @@ class ConverterTest extends TestCase
 
 		// a changed password date is what drops the sessions it already has
 		$this->assertNotEquals($before, $db->fetchOne('SELECT password_date FROM xf_user_profile WHERE user_id = ?', $userId));
+	}
+
+	/**
+	 * Two-step verification, a trusted device, a passkey and an OAuth grant, each planted as a real
+	 * row, on the account and on a second member who must keep all of them. A count of zero proves
+	 * nothing about a table nobody wrote to.
+	 */
+	public function test_two_step_passkeys_and_oauth_grants_are_removed_and_only_its_own()
+	{
+		$sm = $this->app()->db()->getSchemaManager();
+		if (!$sm->tableExists('xf_passkey') || !$sm->tableExists('xf_oauth_token'))
+		{
+			$this->markTestSkipped('Passkeys and OAuth tokens are XenForo 2.3.');
+		}
+
+		$member = $this->createMember();
+		$other = $this->createMember();
+		$tokenIds = [];
+		foreach ([$member, $other] AS $user)
+		{
+			$tokenIds[$user->user_id] = $this->plantOtherLogins($user);
+		}
+
+		$this->converter($this->reload($member->user_id))->convert();
+		\XF::triggerRunOnce();
+
+		$tables = ['xf_user_tfa', 'xf_user_tfa_trusted', 'xf_passkey', 'xf_oauth_token'];
+		foreach ($tables AS $table)
+		{
+			$this->assertDatabaseMissing($table, ['user_id' => $member->user_id]);
+			$this->assertDatabaseHas($table, ['user_id' => $other->user_id]);
+		}
+		$this->assertDatabaseMissing('xf_oauth_refresh_token', ['token_id' => $tokenIds[$member->user_id]]);
+		$this->assertDatabaseHas('xf_oauth_refresh_token', ['token_id' => $tokenIds[$other->user_id]]);
+		$this->assertDatabaseHas('xf_user_option', ['user_id' => $member->user_id, 'use_tfa' => 0]);
+	}
+
+	/**
+	 * @return int the OAuth token's id, which its refresh token is keyed on
+	 */
+	private function plantOtherLogins($user)
+	{
+		$db = $this->app()->db();
+		$userId = $user->user_id;
+
+		$db->insert('xf_user_tfa', [
+			'user_id' => $userId, 'provider_id' => 'totp', 'provider_data' => '[]', 'last_used_date' => 1,
+		]);
+		$db->update('xf_user_option', ['use_tfa' => 1], 'user_id = ?', $userId);
+		$db->insert('xf_user_tfa_trusted', [
+			'user_id' => $userId, 'trusted_key' => bin2hex(random_bytes(16)), 'trusted_until' => 2147483000,
+		]);
+
+		$passkey = $this->app()->em()->create('XF:Passkey');
+		$passkey->bulkSet([
+			'user_id' => $userId, 'name' => 'Planted for a test', 'aaguid' => '',
+			'credential_id' => bin2hex(random_bytes(16)), 'credential_public_key' => bin2hex(random_bytes(16)),
+		]);
+		$passkey->save();
+
+		$db->insert('xf_oauth_token', [
+			'token' => bin2hex(random_bytes(32)), 'client_id' => 'apiuserstest', 'user_id' => $userId,
+			'issue_date' => 1, 'last_use_date' => 1, 'expiry_date' => 2147483000, 'scopes' => '[]',
+		]);
+		$tokenId = $db->lastInsertId();
+		$db->insert('xf_oauth_refresh_token', [
+			'token_id' => $tokenId, 'refresh_token' => bin2hex(random_bytes(32)), 'client_id' => 'apiuserstest',
+			'issue_date' => 1, 'expiry_date' => 2147483000,
+		]);
+
+		return $tokenId;
 	}
 
 	/** A follow names both accounts on each other's public profile, where no listing filter reaches. */
@@ -238,7 +321,7 @@ class ConverterTest extends TestCase
 		$converter = new class($this->app(), $member) extends \Hampel\ApiUsers\Service\ApiUser\Converter {
 			protected function getUserContentMap()
 			{
-				// xf_user_field_value stands in for an add-on's own table: it exists, and holds this user
+				// xf_user_option stands in for an add-on's own table: it exists, and holds this user
 				return ['xf_user_option' => ['user_id', 'emptyable' => false]];
 			}
 		};
@@ -267,12 +350,12 @@ class ConverterTest extends TestCase
 		$member = $this->createMember();
 		$member->user_state = 'email_confirm';
 		$member->save();
-		$this->assertNotSame('', $this->blockerText($member));
+		$this->assertRefusedWith('hampel_apiusers_convert_blocked_not_valid', $member);
 
 		$member->user_state = 'valid';
 		$member->is_banned = true;
 		$member->save();
-		$this->assertNotSame('', $this->blockerText($member));
+		$this->assertRefusedWith('hampel_apiusers_convert_blocked_not_valid', $member);
 	}
 
 	public function test_a_moderator_an_api_user_and_your_own_account_are_refused()
@@ -280,14 +363,30 @@ class ConverterTest extends TestCase
 		$moderator = $this->createMember();
 		$moderator->is_moderator = true;
 		$moderator->save();
-		$this->assertNotSame('', $this->blockerText($moderator));
+		$this->assertRefusedWith('hampel_apiusers_convert_blocked_moderator', $moderator);
 
-		$this->assertNotSame('', $this->blockerText($this->createApiUser()));
+		$this->assertRefusedWith('hampel_apiusers_convert_blocked_already_api_user', $this->createApiUser());
 
 		$self = $this->createMember();
 		$this->assertSame('', $this->blockerText($self));
 		$this->actingAs($self);
-		$this->assertNotSame('', $this->blockerText($self));
+		$this->assertRefusedWith('hampel_apiusers_convert_blocked_own_account', $self);
+	}
+
+	/** The note is stored in a varchar(255), and the creator refuses the same length. */
+	public function test_a_note_longer_than_the_column_is_refused()
+	{
+		$member = $this->createMember();
+
+		$converter = $this->converter($member);
+		$converter->setNote(str_repeat('n', 255));
+		$this->assertSame([], $converter->getBlockers());
+
+		$converter->setNote(str_repeat('n', 256));
+		$this->assertSame(
+			[(string) \XF::phrase('hampel_apiusers_note_is_too_long')],
+			array_map('strval', $converter->getBlockers())
+		);
 	}
 
 	public function test_convert_refuses_to_run_past_a_blocker()

@@ -16,17 +16,7 @@ class HealthCheckTest extends TestCase
 	{
 		parent::setUp();
 
-		// The forum's own API users are not this suite's business, so they are set aside for the
-		// length of the transaction. By primary key only: this database is shared with other
-		// add-ons' suites running at the same time, and an update that scans
-		// xf_user_authenticate waits on every row one of them has locked.
-		$db = $this->app()->db();
-		$userIds = $db->fetchAllColumn('SELECT user_id FROM xf_hampel_apiusers_user');
-		foreach ($userIds AS $userId)
-		{
-			$db->update('xf_user_authenticate', ['scheme_class' => 'XF:NoPassword'], 'user_id = ?', $userId);
-			$db->delete('xf_hampel_apiusers_user', 'user_id = ?', $userId);
-		}
+		$this->setAsideForumApiUsers();
 	}
 
 	private function statuses()
@@ -157,6 +147,28 @@ class HealthCheckTest extends TestCase
 
 		$this->assertSame(HealthCheck::WARNING, $this->statuses()['modifications']);
 		$this->assertStringContainsString('hampelApiUsersUserEditEmail', $this->detail('modifications'));
+	}
+
+	public function test_an_add_on_with_no_modifications_registered_is_a_warning()
+	{
+		$db = $this->app()->db();
+		$ids = $db->fetchAllColumn('SELECT modification_id FROM xf_template_modification WHERE addon_id = ?', 'Hampel/ApiUsers');
+		$this->assertCount(5, $ids);
+		foreach ($ids AS $id)
+		{
+			$db->delete('xf_template_modification', 'modification_id = ?', $id);
+		}
+
+		$this->assertSame(HealthCheck::WARNING, $this->statuses()['modifications']);
+		$this->assertStringContainsString('None registered', $this->detail('modifications'));
+	}
+
+	/** The control panel lists API users on purpose, so the listing check has nothing to prove there. */
+	public function test_the_listing_check_is_skipped_in_the_control_panel()
+	{
+		$this->setAppClassType('admin');
+
+		$this->assertSame(HealthCheck::SKIPPED, $this->statuses()['listings']);
 	}
 
 	public function test_a_banned_or_invalid_api_user_is_a_warning()

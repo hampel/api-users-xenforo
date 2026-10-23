@@ -94,13 +94,20 @@ consequences:
   convert action; an administrator without the permission is given no link into this add-on; the
   add-user page is unchanged.
 - `HealthCheckTest`, `CommandsTest` — each drift a guard cannot prevent is reported, and the exit
-  contract.
+  contract. Neither can show `validate` reporting an extension that is not applied: a class
+  extension resolved once in a process cannot be taken away for one test.
+- `ClassExtensionsTest` — all five extensions are registered against the 2.2 class names and
+  resolve, the controller's included, which `validate` does not check.
 - `SetupTest` — the first uninstall step.
 - `MergeTest` — an API user is merged neither into a member nor with a member into it, by the
   service or through the control panel's form, which gives the reason and queues nothing; two
   ordinary members still merge both ways.
-- `ConverterTest` — what conversion removes and keeps, each refusal, and that a table an add-on
-  registers counts as content.
+- `ConverterTest` — what conversion removes and keeps, each refusal by its own wording, and that a
+  table an add-on registers counts as content. Each way in is planted as a real row, on the
+  account and on a second member who keeps it. Until 2026-10-23 two-step verification was
+  asserted absent without ever having been written, and passkeys and OAuth tokens were not
+  asserted at all, so any of those removals could have been deleted with the suite still passing.
+  Each of the four was then switched off in turn, and the test failed every time.
 
 **Each guard was switched off in turn and the suite failed every time**, on 2026-10-10: the two
 entity guards, the listing exclusion, its control panel exemption, the profile check,

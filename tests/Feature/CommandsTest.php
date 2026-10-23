@@ -66,6 +66,29 @@ class CommandsTest extends TestCase
 		$this->assertEquals($before, $this->app()->db()->fetchOne('SELECT COUNT(*) FROM xf_hampel_apiusers_user'));
 	}
 
+	public function test_list_says_so_when_there_are_none()
+	{
+		$this->setAsideForumApiUsers();
+
+		$tester = $this->runConsoleCommand(ListUsers::class);
+
+		$this->assertSame(0, $tester->getStatusCode());
+		$this->assertStringContainsString('There are no API users.', $tester->getDisplay());
+	}
+
+	/** A skipped check is shown as one, and is not counted as a failure. */
+	public function test_validate_shows_a_skipped_check_as_skipped()
+	{
+		$this->setAsideForumApiUsers();
+		$this->setAppClassType('admin');
+
+		$tester = $this->runConsoleCommand(Validate::class);
+
+		$this->assertMatchesRegularExpression('/\[    \] .*Not checked from the control panel/', $tester->getDisplay());
+		$this->assertStringNotContainsString('[fail]', $tester->getDisplay());
+		$this->assertNotSame(1, $tester->getStatusCode());
+	}
+
 	/**
 	 * A new API user has no key yet, which is a warning: 0 by default so a gate can rely on it,
 	 * 2 under --strict so a monitor hears of it.

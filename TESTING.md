@@ -77,7 +77,8 @@ consequences:
 ### Static analysis
 
 ```bash
-vendor/bin/xenforo-phpstan generate      # once per forum, and after a XenForo upgrade
+vendor/bin/xenforo-phpstan generate --check   # read-only: is the forum's generated set current?
+vendor/bin/xenforo-phpstan generate           # once per forum, and after a XenForo upgrade
 vendor/bin/phpstan analyse --memory-limit=1G
 ```
 

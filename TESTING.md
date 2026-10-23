@@ -102,8 +102,9 @@ forum's `internal_data/phpstan/`, not into this repository, and a stale set fail
 - **XenForo types a user's id as `int|null` and its `Auth` relation as nullable**, since a user not
   yet saved has neither. The tests read them through `idOf()` and `authOf()` on the base
   `TestCase`, which assert that they are there, and look an account up with `findUser()`.
-- **A value typed `mixed` is checked before it is used, never cast.** Request input and console
-  options go through `is_string()`, which the filter or option definition already guarantees.
+- **A value typed `mixed` is checked before it is used, never cast.** Request input needs nothing:
+  the package types `filter()` from its filter string. A console option goes through
+  `is_string()`, which its definition already guarantees.
   Core's content map, read by reflection, is checked entry by entry, and a malformed one throws:
   skipping an entry would count its table as holding no content and let a used account convert.
 - **Level max is the next step**: 129 errors on that date, 40 in the tests.

@@ -74,7 +74,6 @@ class AdminControllerTest extends TestCase
 
 		$reply = $this->dispatch('api-users', 'admin');
 
-		$this->assertReplyIsView($reply);
 		$this->assertReplyTemplate($reply, 'hampel_apiusers_list');
 		$this->assertArrayHasKey($user->user_id, $this->replyParam($reply, 'apiUsers')->toArray());
 		$this->assertArrayNotHasKey($user->user_id, $this->replyParam($reply, 'apiKeyCounts'));
@@ -87,7 +86,7 @@ class AdminControllerTest extends TestCase
 
 		$reply = $this->save(['username' => $name, 'note' => 'made in the control panel']);
 
-		$this->assertInstanceOf(\XF\Mvc\Reply\Redirect::class, $reply);
+		$this->assertReplyIsRedirect($reply);
 		$this->assertStringContainsString($this->app()->router('admin')->buildLink('api-users'), $reply->getUrl());
 		$this->assertStringContainsString($name, (string) $reply->getMessage());
 
@@ -166,7 +165,6 @@ class AdminControllerTest extends TestCase
 
 		$reply = $this->dispatch('api-users/' . $member->user_id . '/convert', 'admin');
 
-		$this->assertReplyIsView($reply);
 		$this->assertReplyTemplate($reply, 'hampel_apiusers_convert');
 		$this->assertSame([], $this->replyParam($reply, 'blockers'));
 		$this->assertNotSame('', $this->app()->db()->fetchOne('SELECT email FROM xf_user WHERE user_id = ?', $member->user_id));

@@ -127,8 +127,9 @@ so either can still be null.
   convert action; an administrator without the permission is given no link into this add-on; the
   add-user page is unchanged.
 - `HealthCheckTest`, `CommandsTest` — each drift a guard cannot prevent is reported, and the exit
-  contract. Neither can show `validate` reporting an extension that is not applied: a class
-  extension resolved once in a process cannot be taken away for one test.
+  contract. Neither shows `validate` reporting an extension that is not applied. A class extension
+  resolved once in a process cannot be taken away for one test, so it would take the check reading
+  an expected list a test can replace, which it does not yet.
 - `ClassExtensionsTest` — all five extensions are registered against the 2.2 class names and
   resolve, the controller's included, which `validate` does not check.
 - `SetupTest` — the first uninstall step.

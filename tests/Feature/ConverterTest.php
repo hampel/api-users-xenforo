@@ -143,8 +143,14 @@ class ConverterTest extends TestCase
 			$tokenIds[$user->user_id] = $this->plantOtherLogins($user);
 		}
 
+		// a saved passkey enables core's passkey two-step provider in deferred work, and the
+		// provider cached by that save still holds the entries from before it, so it is run and
+		// the cache dropped before conversion deletes the passkey
+		$this->runDeferred();
+		$this->app()->em()->clearEntityCache();
+
 		$this->converter($this->reload($member->user_id))->convert();
-		\XF::triggerRunOnce();
+		$this->assertSame(['updateUserPasskeyProvider-' . $member->user_id], $this->runDeferred());
 
 		$tables = ['xf_user_tfa', 'xf_user_tfa_trusted', 'xf_passkey', 'xf_oauth_token'];
 		foreach ($tables AS $table)

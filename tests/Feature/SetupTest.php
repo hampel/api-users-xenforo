@@ -16,16 +16,18 @@ class SetupTest extends TestCase
 	{
 		$user = $this->createApiUser();
 		$member = $this->createMember();
-		$memberScheme = $this->schemeOf($member->user_id);
+		$memberScheme = $this->schemeOf($this->idOf($member));
 
-		$setup = new Setup($this->app()->addOnManager()->getById('Hampel/ApiUsers'), $this->app());
+		$addOn = $this->app()->addOnManager()->getById('Hampel/ApiUsers');
+		$this->assertNotNull($addOn);
+		$setup = new Setup($addOn, $this->app());
 		$setup->uninstallStep1();
 
-		$this->assertSame('XF:NoPassword', $this->schemeOf($user->user_id));
-		$this->assertSame($memberScheme, $this->schemeOf($member->user_id));
+		$this->assertSame('XF:NoPassword', $this->schemeOf($this->idOf($user)));
+		$this->assertSame($memberScheme, $this->schemeOf($this->idOf($member)));
 
 		// and what is left behind is an account core itself will not log in
-		$auth = $this->app()->em()->find('XF:UserAuth', $user->user_id);
+		$auth = $this->authOf($user);
 		$this->assertFalse($auth->authenticate('anything'));
 	}
 }

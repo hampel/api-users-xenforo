@@ -24,7 +24,7 @@ class CoreAdministratorPageTest extends TestCase
 		$admin = $this->actingAsAdministrator([], ['is_super_admin' => true]);
 
 		$auth = $this->app()->em()->create('XF:UserAuth');
-		$auth->user_id = $admin->user_id;
+		$auth->user_id = $this->idOf($admin);
 		$auth->setPassword(self::PASSWORD);
 		$admin->hydrateRelation('Auth', $auth);
 
@@ -51,10 +51,10 @@ class CoreAdministratorPageTest extends TestCase
 		$this->actingAsSuperAdmin();
 		$user = $this->createApiUser(true);
 
-		$reply = $this->saveAdministrator($user->user_id, ['viewLogs', 'viewStatistics']);
+		$reply = $this->saveAdministrator($this->idOf($user), ['viewLogs', 'viewStatistics']);
 
 		$this->assertReplyIsRedirect($reply);
-		$this->assertIsApiOnly($user->user_id);
+		$this->assertIsApiOnly($this->idOf($user));
 		$this->assertNoMailSent();
 		$this->assertEquals(0, $this->app()->db()->fetchOne(
 			'SELECT COUNT(*) FROM xf_user_confirmation WHERE user_id = ?', $user->user_id
@@ -82,7 +82,7 @@ class CoreAdministratorPageTest extends TestCase
 		], [], 'POST');
 
 		$this->assertReplyIsRedirect($reply);
-		$this->assertIsApiOnly($user->user_id);
+		$this->assertIsApiOnly($this->idOf($user));
 		$this->assertNoMailSent();
 		$this->assertEquals(1, $this->app()->db()->fetchOne('SELECT is_admin FROM xf_user WHERE user_id = ?', $user->user_id));
 	}

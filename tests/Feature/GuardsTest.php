@@ -14,37 +14,37 @@ class GuardsTest extends TestCase
 	public function test_a_password_cannot_be_set(): void
 	{
 		$user = $this->createApiUser();
-		$auth = $this->app()->em()->find('XF:UserAuth', $user->user_id);
+		$auth = $this->authOf($user);
 
 		$auth->setPassword('correct horse battery staple');
 
 		$this->assertFalse($auth->save(false));
 		$this->assertArrayHasKey('password', $auth->getErrors());
-		$this->assertIsApiOnly($user->user_id);
+		$this->assertIsApiOnly($this->idOf($user));
 	}
 
 	/** What Hampel/ArchiveSite does to every account it archives, and core to a connected account. */
 	public function test_it_cannot_be_moved_to_core_passwordless_scheme_either(): void
 	{
 		$user = $this->createApiUser();
-		$auth = $this->app()->em()->find('XF:UserAuth', $user->user_id);
+		$auth = $this->authOf($user);
 
 		$auth->setNoPassword();
 
 		$this->assertFalse($auth->save(false));
-		$this->assertIsApiOnly($user->user_id);
+		$this->assertIsApiOnly($this->idOf($user));
 	}
 
 	/** The route a lost-password confirmation and core's administrator save both take. */
 	public function test_a_password_reset_cannot_give_it_one(): void
 	{
 		$user = $this->createApiUser();
-		$auth = $this->app()->em()->find('XF:UserAuth', $user->user_id);
+		$auth = $this->authOf($user);
 
 		$auth->resetPassword();
 
 		$this->assertFalse($auth->save(false));
-		$this->assertIsApiOnly($user->user_id);
+		$this->assertIsApiOnly($this->idOf($user));
 	}
 
 	public function test_an_email_address_cannot_be_set_even_by_an_administrator(): void
@@ -72,8 +72,8 @@ class GuardsTest extends TestCase
 	{
 		$member = $this->createMember();
 
-		$member->Auth->setPassword('another long password');
-		$this->assertTrue($member->Auth->save(false));
+		$this->authOf($member)->setPassword('another long password');
+		$this->assertTrue($this->authOf($member)->save(false));
 
 		$member->setOption('admin_edit', true);
 		$member->email = 'changed@example.invalid';

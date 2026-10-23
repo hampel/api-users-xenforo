@@ -59,8 +59,8 @@ class MergeTest extends TestCase
 
 		// finished, so the job that asked does not come back for another go
 		$this->assertTrue($result->isCompleted());
-		$this->assertTrue($this->exists($apiUser->user_id), 'the source of a merge is deleted, and this one must not be');
-		$this->assertIsApiOnly($apiUser->user_id);
+		$this->assertTrue($this->exists($this->idOf($apiUser)), 'the source of a merge is deleted, and this one must not be');
+		$this->assertIsApiOnly($this->idOf($apiUser));
 		$this->assertExceptionLogged(\ErrorException::class, 'ApiUsers: Refused to merge');
 	}
 
@@ -76,7 +76,7 @@ class MergeTest extends TestCase
 		$result = $this->merge($member, $apiUser);
 
 		$this->assertTrue($result->isCompleted());
-		$this->assertTrue($this->exists($member->user_id));
+		$this->assertTrue($this->exists($this->idOf($member)));
 		$this->assertEquals($member->user_id, $this->app()->db()->fetchOne(
 			'SELECT user_id FROM xf_poll_vote WHERE poll_id = 2147480000'
 		), 'the member keeps its content');
@@ -90,8 +90,8 @@ class MergeTest extends TestCase
 		$target = $this->createMember();
 
 		$this->assertTrue($this->merge($source, $target)->isCompleted());
-		$this->assertFalse($this->exists($source->user_id));
-		$this->assertTrue($this->exists($target->user_id));
+		$this->assertFalse($this->exists($this->idOf($source)));
+		$this->assertTrue($this->exists($this->idOf($target)));
 	}
 
 	public function test_the_merge_form_is_refused_for_an_api_user_with_the_reason(): void

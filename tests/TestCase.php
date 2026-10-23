@@ -71,6 +71,49 @@ abstract class TestCase extends BaseTestCase
 	}
 
 	/**
+	 * A saved user's id. XenForo types it int|null, since a user not yet saved has none.
+	 *
+	 * @param \XF\Entity\User $user
+	 *
+	 * @return int
+	 */
+	protected function idOf($user)
+	{
+		$this->assertNotNull($user->user_id, 'The user has not been saved');
+
+		return $user->user_id;
+	}
+
+	/**
+	 * A user that must exist.
+	 *
+	 * @param int $userId
+	 *
+	 * @return \XF\Entity\User
+	 */
+	protected function findUser($userId)
+	{
+		$user = $this->app()->em()->find('XF:User', $userId);
+		$this->assertNotNull($user, "User {$userId} is gone");
+
+		return $user;
+	}
+
+	/**
+	 * A user's authentication record, which every account made here has.
+	 *
+	 * @param \XF\Entity\User $user
+	 *
+	 * @return \XF\Entity\UserAuth
+	 */
+	protected function authOf($user)
+	{
+		$this->assertNotNull($user->Auth, "User {$user->user_id} has no authentication record");
+
+		return $user->Auth;
+	}
+
+	/**
 	 * The forum's own API users are not the suite's business, so a test that counts them sets them
 	 * aside for the length of its transaction. Needs UsesDatabaseTransactions. By primary key
 	 * only: this database is shared with other add-ons' suites running at the same time, and an

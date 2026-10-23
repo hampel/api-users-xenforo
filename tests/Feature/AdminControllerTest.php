@@ -21,7 +21,7 @@ class AdminControllerTest extends TestCase
 		$admin = $this->actingAsAdministrator(array_fill_keys($permissions, true));
 
 		$auth = $this->app()->em()->create('XF:UserAuth');
-		$auth->user_id = $admin->user_id;
+		$auth->user_id = $this->idOf($admin);
 		$auth->setPassword(self::PASSWORD);
 		$admin->hydrateRelation('Auth', $auth);
 
@@ -181,7 +181,7 @@ class AdminControllerTest extends TestCase
 		$reply = $this->dispatch('api-users/' . $member->user_id . '/convert', 'admin', ['note' => 'the old bot'], [], 'POST');
 
 		$this->assertReplyIsRedirect($reply, $this->app()->router('admin')->buildLink('users/edit', $member));
-		$this->assertIsApiOnly($member->user_id);
+		$this->assertIsApiOnly($this->idOf($member));
 
 		$row = $this->app()->db()->fetchRow('SELECT * FROM xf_hampel_apiusers_user WHERE user_id = ?', $member->user_id);
 		$this->assertSame('the old bot', $row['note']);

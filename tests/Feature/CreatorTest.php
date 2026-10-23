@@ -17,7 +17,7 @@ class CreatorTest extends TestCase
 		$this->assertSame('valid', $row['user_state']);
 		$this->assertEquals(0, $row['is_banned']);
 		$this->assertEquals(0, $row['is_admin']);
-		$this->assertIsApiOnly($user->user_id);
+		$this->assertIsApiOnly($this->idOf($user));
 	}
 
 	public function test_it_records_the_account_as_an_api_user(): void
@@ -73,7 +73,7 @@ class CreatorTest extends TestCase
 		$this->assertEquals(1, $db->fetchOne('SELECT is_admin FROM xf_user WHERE user_id = ?', $user->user_id));
 
 		// becoming an administrator must not have cost it the scheme
-		$this->assertIsApiOnly($user->user_id);
+		$this->assertIsApiOnly($this->idOf($user));
 	}
 
 	public function test_a_name_already_in_use_is_refused_and_nothing_is_written(): void
@@ -100,7 +100,7 @@ class CreatorTest extends TestCase
 	public function test_deleting_the_account_removes_its_record(): void
 	{
 		$user = $this->createApiUser();
-		$userId = $user->user_id;
+		$userId = $this->idOf($user);
 
 		$user->delete();
 

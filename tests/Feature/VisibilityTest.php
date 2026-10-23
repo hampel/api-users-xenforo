@@ -21,8 +21,8 @@ class VisibilityTest extends TestCase
 		$user = $this->createApiUser();
 		$member = $this->createMember();
 
-		$this->assertFalse($this->isListedAsValid($user->user_id));
-		$this->assertTrue($this->isListedAsValid($member->user_id));
+		$this->assertFalse($this->isListedAsValid($this->idOf($user)));
+		$this->assertTrue($this->isListedAsValid($this->idOf($member)));
 	}
 
 	public function test_an_api_user_is_not_counted_as_a_member(): void
@@ -41,7 +41,7 @@ class VisibilityTest extends TestCase
 
 		$this->setAppClassType('admin');
 
-		$this->assertTrue($this->isListedAsValid($user->user_id));
+		$this->assertTrue($this->isListedAsValid($this->idOf($user)));
 	}
 
 	public function test_the_control_panel_user_search_finds_an_api_user(): void
@@ -99,9 +99,9 @@ class VisibilityTest extends TestCase
 		]);
 		$this->app()->db()->update('xf_user_profile', ['following' => (string) $apiUser->user_id], 'user_id = ?', $member->user_id);
 		$this->app()->em()->clearEntityCache();
-		$member = $this->app()->em()->find('XF:User', $member->user_id);
+		$member = $this->findUser($this->idOf($member));
 
-		$this->assertTrue($member->canFollowUser($this->app()->em()->find('XF:User', $apiUser->user_id)));
+		$this->assertTrue($member->canFollowUser($this->findUser($this->idOf($apiUser))));
 	}
 
 	public function test_an_ordinary_member_profile_is_unaffected(): void

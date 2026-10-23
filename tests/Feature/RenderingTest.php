@@ -156,7 +156,7 @@ class RenderingTest extends TestCase
 		$this->actingAsAdministrator(['user' => true, 'hampelApiUsers' => true]);
 		$user = $this->createApiUser();
 
-		[$html, $actions] = $this->editPage($user->user_id);
+		[$html, $actions] = $this->editPage($this->idOf($user));
 
 		$this->assertSee($html, $user->username);
 		$this->assertSee($html, self::NOTICE);
@@ -174,7 +174,7 @@ class RenderingTest extends TestCase
 		$this->actingAsAdministrator(['user' => true, 'hampelApiUsers' => true]);
 		$member = $this->createMember();
 
-		[$html, $actions] = $this->editPage($member->user_id);
+		[$html, $actions] = $this->editPage($this->idOf($member));
 
 		$this->assertSee($html, $member->username);
 		$this->assertSee($html, self::EMAIL_INPUT, false);
@@ -195,13 +195,13 @@ class RenderingTest extends TestCase
 		$user = $this->createApiUser();
 		$member = $this->createMember();
 
-		[$apiUserPage] = $this->editPage($user->user_id);
+		[$apiUserPage] = $this->editPage($this->idOf($user));
 
 		$this->assertSee($apiUserPage, self::NOTICE);
 		$this->assertDontSee($apiUserPage, self::EMAIL_INPUT, false);
 		$this->assertDontSee($apiUserPage, 'api-users', false);
 
-		[$memberPage, $actions] = $this->editPage($member->user_id);
+		[$memberPage, $actions] = $this->editPage($this->idOf($member));
 
 		$this->assertSee($memberPage, self::EMAIL_INPUT, false);
 		$this->assertSee($actions, 'Merge with user');

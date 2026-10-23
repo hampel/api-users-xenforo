@@ -71,7 +71,7 @@ class HealthCheckTest extends TestCase
 	private function healthyApiUser($admin = false)
 	{
 		$user = $this->createApiUser($admin);
-		$this->giveKey($user->user_id);
+		$this->giveKey($this->idOf($user));
 
 		return $user;
 	}
@@ -216,10 +216,10 @@ class HealthCheckTest extends TestCase
 		$user = $this->createApiUser();
 		$this->assertSame(HealthCheck::WARNING, $this->statuses()['keys']);
 
-		$this->giveKey($user->user_id, false);
+		$this->giveKey($this->idOf($user), false);
 		$this->assertSame(HealthCheck::WARNING, $this->statuses()['keys']);
 
-		$this->giveKey($user->user_id);
+		$this->giveKey($this->idOf($user));
 		$this->assertSame(HealthCheck::OK, $this->statuses()['keys']);
 	}
 

@@ -83,7 +83,7 @@ vendor/bin/xenforo-phpstan generate           # once per forum, and after a XenF
 vendor/bin/phpstan analyse --memory-limit=1G
 ```
 
-**Level 7, with no errors and no baseline**, since 2026-10-23, through `hampel/xenforo-phpstan`.
+**Level 8, with no errors and no baseline**, since 2026-10-23, through `hampel/xenforo-phpstan`.
 Run it from this directory with this add-on's own `vendor/bin/phpstan`. `generate` writes into the
 forum's `internal_data/phpstan/`, not into this repository, and a stale set fails loudly.
 
@@ -99,8 +99,10 @@ forum's `internal_data/phpstan/`, not into this repository, and a stale set fail
   every test method declares `: void`, as `setUp()` already did.
 - **A value that can be `false` is asserted before it is used.** A file that cannot be read, a
   user that was not made: the test fails there, by name, and not on a type error further on.
-- **Level 8 is the next step**: 64 errors on that date, 62 in the tests. Levels 9 and max were 98
-  and 232.
+- **XenForo types a user's id as `int|null` and its `Auth` relation as nullable**, since a user not
+  yet saved has neither. The tests read them through `idOf()` and `authOf()` on the base
+  `TestCase`, which assert that they are there, and look an account up with `findUser()`.
+- **Level 9 is the next step**: 34 errors on that date, 12 in the tests. Level max was 168.
 
 **One report needed a change to the code rather than to the configuration.** The four `instanceof`
 tests in `HealthCheck::checkExtensions()` read as always true, because the analysis types what the

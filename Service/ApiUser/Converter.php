@@ -70,7 +70,8 @@ class Converter extends AbstractService
 	 */
 	public function setCreatedBy(User $user)
 	{
-		$this->createdByUserId = $user->user_id;
+		// a user not yet saved has no id, and 0 is how the record says nobody
+		$this->createdByUserId = (int) $user->user_id;
 	}
 
 	/**

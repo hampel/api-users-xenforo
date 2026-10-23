@@ -43,19 +43,19 @@ class ConverterTest extends TestCase
 
 	/**
 	 * @param int $userId
-	 * @return \XF\Entity\User|null
+	 * @return \XF\Entity\User
 	 */
 	private function reload($userId)
 	{
 		$this->app()->em()->clearEntityCache();
 
-		return $this->app()->em()->find('XF:User', $userId);
+		return $this->findUser($userId);
 	}
 
 	public function test_an_unused_account_is_converted(): void
 	{
 		$member = $this->createMember();
-		$userId = $member->user_id;
+		$userId = $this->idOf($member);
 
 		$converter = $this->converter($member);
 		$converter->setNote('was the old bot account');
@@ -78,25 +78,25 @@ class ConverterTest extends TestCase
 	public function test_the_old_password_no_longer_works_and_the_guards_now_apply(): void
 	{
 		$member = $this->createMember();
-		$member->Auth->setPassword('the password it used to have');
-		$member->Auth->save();
-		$userId = $member->user_id;
+		$this->authOf($member)->setPassword('the password it used to have');
+		$this->authOf($member)->save();
+		$userId = $this->idOf($member);
 
 		$this->converter($member)->convert();
 
 		$user = $this->reload($userId);
 		$this->assertTrue($user->isApiUser());
-		$this->assertFalse($user->Auth->authenticate('the password it used to have'));
+		$this->assertFalse($this->authOf($user)->authenticate('the password it used to have'));
 
-		$user->Auth->setPassword('a new one');
-		$this->assertFalse($user->Auth->save(false));
+		$this->authOf($user)->setPassword('a new one');
+		$this->assertFalse($this->authOf($user)->save(false));
 	}
 
 	/** A connected account logs its user in whatever the authentication scheme says. */
 	public function test_every_other_way_of_logging_in_is_removed(): void
 	{
 		$member = $this->createMember();
-		$userId = $member->user_id;
+		$userId = $this->idOf($member);
 		$db = $this->app()->db();
 
 		$db->insert('xf_user_connected_account', [
@@ -149,7 +149,7 @@ class ConverterTest extends TestCase
 		$this->runDeferred();
 		$this->app()->em()->clearEntityCache();
 
-		$this->converter($this->reload($member->user_id))->convert();
+		$this->converter($this->reload($this->idOf($member)))->convert();
 		$this->assertSame(['updateUserPasskeyProvider-' . $member->user_id], $this->runDeferred());
 
 		$tables = ['xf_user_tfa', 'xf_user_tfa_trusted', 'xf_passkey', 'xf_oauth_token'];
@@ -171,7 +171,7 @@ class ConverterTest extends TestCase
 	private function plantOtherLogins($user)
 	{
 		$db = $this->app()->db();
-		$userId = $user->user_id;
+		$userId = $this->idOf($user);
 
 		$db->insert('xf_user_tfa', [
 			'user_id' => $userId, 'provider_id' => 'totp', 'provider_data' => '[]', 'last_used_date' => 1,
@@ -219,7 +219,7 @@ class ConverterTest extends TestCase
 		$following = 'SELECT following FROM xf_user_profile WHERE user_id = ?';
 		$this->assertSame((string) $member->user_id, (string) $db->fetchOne($following, $other->user_id));
 
-		$this->converter($this->reload($member->user_id))->convert();
+		$this->converter($this->reload($this->idOf($member)))->convert();
 
 		$this->assertEquals(0, $db->fetchOne(
 			'SELECT COUNT(*) FROM xf_user_follow WHERE user_id = ? OR follow_user_id = ?', [$member->user_id, $member->user_id]
@@ -250,7 +250,7 @@ class ConverterTest extends TestCase
 		$admin = $this->app()->em()->create('XF:Admin');
 		$admin->bulkSet(['user_id' => $member->user_id, 'permission_cache' => ['viewLogs' => true]]);
 		$admin->save();
-		$userId = $member->user_id;
+		$userId = $this->idOf($member);
 
 		$user = $this->reload($userId);
 		$this->assertSame([], $this->converter($user)->getBlockers());

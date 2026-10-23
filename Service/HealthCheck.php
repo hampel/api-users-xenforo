@@ -16,16 +16,20 @@ use XF\Service\AbstractService;
  */
 class HealthCheck extends AbstractService
 {
+	/** @var string */
 	const OK = 'ok';
+	/** @var string */
 	const WARNING = 'warning';
+	/** @var string */
 	const PROBLEM = 'problem';
 
-	/** the check did not apply here - never a pass, and never counted against the run */
+	/** @var string the check did not apply here - never a pass, and never counted against the run */
 	const SKIPPED = 'skipped';
 
-	/** every server error log row this add-on writes begins with this */
+	/** @var string every server error log row this add-on writes begins with this */
 	const ERROR_LOG_PREFIX = 'ApiUsers: ';
 
+	/** @var string */
 	const TABLE = 'xf_hampel_apiusers_user';
 
 	/** in the order they are reported: check key => [section, label, method] */
@@ -159,7 +163,8 @@ class HealthCheck extends AbstractService
 			return [static::SKIPPED, 'Not checked from the control panel, where API users are listed on purpose.'];
 		}
 
-		$query = $this->finder('XF:User')->isValidUser()->getQuery();
+		// a query that cannot be read is reported as not excluding them
+		$query = $this->text($this->finder('XF:User')->isValidUser()->getQuery());
 
 		if (strpos($query, static::TABLE) === false)
 		{
@@ -187,7 +192,7 @@ class HealthCheck extends AbstractService
 			GROUP BY m.modification_id
 		', 'Hampel/ApiUsers');
 
-		if (!$mods)
+		if (!is_array($mods) || !$mods)
 		{
 			return [static::WARNING, 'None registered: the user edit page neither marks an API user nor offers to convert one.'];
 		}
@@ -195,9 +200,14 @@ class HealthCheck extends AbstractService
 		$dead = [];
 		foreach ($mods AS $mod)
 		{
-			if (!$mod['enabled'] || !$mod['applied'])
+			if (!is_array($mod))
 			{
-				$dead[] = $mod['modification_key'];
+				continue;
+			}
+
+			if (empty($mod['enabled']) || empty($mod['applied']))
+			{
+				$dead[] = $this->text($mod['modification_key'] ?? '');
 			}
 		}
 
@@ -214,7 +224,7 @@ class HealthCheck extends AbstractService
 	 */
 	public function checkAccounts()
 	{
-		$total = $this->db()->fetchOne('SELECT COUNT(*) FROM ' . static::TABLE);
+		$total = $this->number($this->db()->fetchOne('SELECT COUNT(*) FROM ' . static::TABLE));
 		if (!$total)
 		{
 			return [static::WARNING, 'There are no API users. Create one with api-users:create or under Setup > API users.'];
@@ -410,11 +420,11 @@ class HealthCheck extends AbstractService
 			return [static::PROBLEM, 'Flagged as an administrator with no administrator record: ' . implode(', ', $names) . '.'];
 		}
 
-		$admins = $this->db()->fetchOne('
+		$admins = $this->number($this->db()->fetchOne('
 			SELECT COUNT(*)
 			FROM ' . static::TABLE . ' AS api_user
 			INNER JOIN xf_admin AS admin ON (admin.user_id = api_user.user_id)
-		');
+		'));
 
 		return [static::OK, $admins . ' of the API users ' . ($admins == 1 ? 'is an administrator.' : 'are administrators.')];
 	}
@@ -475,12 +485,12 @@ class HealthCheck extends AbstractService
 			ORDER BY user.username
 		');
 
-		if ($unprotected)
+		if (is_array($unprotected) && $unprotected)
 		{
 			$list = [];
 			foreach ($unprotected AS $userId => $username)
 			{
-				$list[] = "{$username} ({$userId})";
+				$list[] = $this->text($username) . " ({$userId})";
 			}
 
 			return [static::WARNING, 'Not protected from an archive run, which would stop at the account: '
@@ -510,8 +520,31 @@ class HealthCheck extends AbstractService
 	 */
 	protected function fetchText($sql, $params = [])
 	{
-		return array_map(function ($value) { return is_scalar($value) ? (string) $value : ''; },
-			$this->db()->fetchAllColumn($sql, $params));
+		return array_map([$this, 'text'], $this->db()->fetchAllColumn($sql, $params));
+	}
+
+	/**
+	 * A database value as text. Every value here is a scalar or null; anything else is empty.
+	 *
+	 * @param mixed $value
+	 *
+	 * @return string
+	 */
+	protected function text($value)
+	{
+		return is_scalar($value) ? (string) $value : '';
+	}
+
+	/**
+	 * A database value as a count or an id.
+	 *
+	 * @param mixed $value
+	 *
+	 * @return int
+	 */
+	protected function number($value)
+	{
+		return is_numeric($value) ? (int) $value : 0;
 	}
 
 	/**
@@ -529,6 +562,6 @@ class HealthCheck extends AbstractService
 			return [];
 		}
 
-		return array_map('intval', (array) $ids);
+		return array_map([$this, 'number'], (array) $ids);
 	}
 }

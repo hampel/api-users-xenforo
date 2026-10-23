@@ -54,6 +54,7 @@ No options, cron entries, jobs or public templates.
 ```bash
 composer install
 vendor/bin/phpunit
+php -d pcov.enabled=1 vendor/bin/phpunit --coverage-text   # what phpunit.xml's <source> names
 ```
 
 **The feature tests run against the development forum's own database, inside a transaction each.**

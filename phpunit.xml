@@ -23,4 +23,21 @@
       <directory suffix="Test.php">./tests/Feature</directory>
     </testsuite>
   </testsuites>
+
+  <!-- what a coverage report covers: the add-on's own PHP. Seed/ and Factory/ need the Seeder
+       add-on and never ship, so the suite cannot run them -->
+  <source>
+    <include>
+      <directory suffix=".php">.</directory>
+    </include>
+    <exclude>
+      <directory>./_build</directory>
+      <directory>./_data</directory>
+      <directory>./_output</directory>
+      <directory>./Factory</directory>
+      <directory>./Seed</directory>
+      <directory>./tests</directory>
+      <directory>./vendor</directory>
+    </exclude>
+  </source>
 </phpunit>

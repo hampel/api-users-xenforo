@@ -46,7 +46,9 @@ class SecretsDeclarationTest extends TestCase
 			{
 				continue;
 			}
-			if (preg_match_all('/XF::config\(\'([^\']+)\'\)/', file_get_contents($file->getPathname()), $matches))
+			$source = file_get_contents($file->getPathname());
+			$this->assertIsString($source, $path);
+			if (preg_match_all('/XF::config\(\'([^\']+)\'\)/', $source, $matches))
 			{
 				foreach ($matches[1] AS $key)
 				{

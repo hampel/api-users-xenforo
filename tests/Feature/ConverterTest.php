@@ -299,7 +299,7 @@ class ConverterTest extends TestCase
 		$creator->setOptions(['open_invite' => false, 'conversation_open' => true]);
 		$creator->setRecipientsTrusted($recipient);
 		$creator->setContent('Welcome', 'Welcome to the forum.');
-		$this->assertTrue($creator->validate($errors), json_encode($errors));
+		$this->assertTrue($creator->validate($errors), json_encode($errors, JSON_THROW_ON_ERROR));
 		$conversation = $creator->save();
 
 		// the recipient really does hold it, in both of the tables that say so
@@ -314,7 +314,7 @@ class ConverterTest extends TestCase
 		$replier = $this->app()->service('XF:Conversation\Replier', $conversation, $recipient);
 		$replier->setIsAutomated();
 		$replier->setMessageContent('Thank you.');
-		$this->assertTrue($replier->validate($errors), json_encode($errors));
+		$this->assertTrue($replier->validate($errors), json_encode($errors, JSON_THROW_ON_ERROR));
 		$replier->save();
 
 		$this->assertStringContainsString('xf_conversation_message', $this->blockerText($recipient));

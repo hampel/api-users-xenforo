@@ -54,7 +54,9 @@ class AdminControllerTest extends TestCase
 	 */
 	private function userIdOf($username)
 	{
-		return $this->app()->db()->fetchOne('SELECT user_id FROM xf_user WHERE username = ?', $username);
+		$userId = $this->app()->db()->fetchOne('SELECT user_id FROM xf_user WHERE username = ?', $username);
+
+		return $userId === false ? false : (int) $userId;
 	}
 
 	public function test_every_page_needs_the_manage_api_users_permission(): void
@@ -91,6 +93,7 @@ class AdminControllerTest extends TestCase
 		$this->assertStringContainsString($name, (string) $reply->getMessage());
 
 		$userId = $this->userIdOf($name);
+		$this->assertNotFalse($userId, 'No account was made');
 		$this->assertIsApiOnly($userId);
 
 		$row = $this->app()->db()->fetchRow('SELECT * FROM xf_hampel_apiusers_user WHERE user_id = ?', $userId);

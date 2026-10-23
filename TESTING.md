@@ -83,7 +83,7 @@ vendor/bin/xenforo-phpstan generate           # once per forum, and after a XenF
 vendor/bin/phpstan analyse --memory-limit=1G
 ```
 
-**Level 6, with no errors and no baseline**, since 2026-10-23, through `hampel/xenforo-phpstan`.
+**Level 7, with no errors and no baseline**, since 2026-10-23, through `hampel/xenforo-phpstan`.
 Run it from this directory with this add-on's own `vendor/bin/phpstan`. `generate` writes into the
 forum's `internal_data/phpstan/`, not into this repository, and a stale set fails loudly.
 
@@ -97,8 +97,10 @@ forum's `internal_data/phpstan/`, not into this repository, and a stale set fail
 - **Types are docblocks in the shipped code and native only on test methods.** The floor is PHP
   7.4, and an inherited method takes no typed parameters, so `@param` and `@return` carry them;
   every test method declares `: void`, as `setUp()` already did.
-- **Level 7 is the next step**: 11 errors on that date, all in the tests. Levels 8, 9 and max were
-  75, 109 and 243, against 266, 294 and 534 before level 6's typing.
+- **A value that can be `false` is asserted before it is used.** A file that cannot be read, a
+  user that was not made: the test fails there, by name, and not on a type error further on.
+- **Level 8 is the next step**: 64 errors on that date, 62 in the tests. Levels 9 and max were 98
+  and 232.
 
 **One report needed a change to the code rather than to the configuration.** The four `instanceof`
 tests in `HealthCheck::checkExtensions()` read as always true, because the analysis types what the

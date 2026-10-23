@@ -16,7 +16,9 @@ class CommandsTest extends TestCase
 	 */
 	private function userIdOf($username)
 	{
-		return $this->app()->db()->fetchOne('SELECT user_id FROM xf_user WHERE username = ?', $username);
+		$userId = $this->app()->db()->fetchOne('SELECT user_id FROM xf_user WHERE username = ?', $username);
+
+		return $userId === false ? false : (int) $userId;
 	}
 
 	public function test_create_makes_an_api_user(): void
@@ -29,6 +31,7 @@ class CommandsTest extends TestCase
 		$this->assertStringContainsString($name, $tester->getDisplay());
 
 		$userId = $this->userIdOf($name);
+		$this->assertNotFalse($userId, 'No account was made');
 		$this->assertIsApiOnly($userId);
 		$this->assertSame('made in a test', $this->app()->db()->fetchOne(
 			'SELECT note FROM xf_hampel_apiusers_user WHERE user_id = ?', $userId

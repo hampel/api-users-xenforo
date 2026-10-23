@@ -47,7 +47,7 @@ abstract class TestCase extends BaseTestCase
 		$creator->setNote($note);
 		$creator->setAdmin($admin);
 
-		$this->assertTrue($creator->validate($errors), 'An API user could not be created: ' . json_encode($errors));
+		$this->assertTrue($creator->validate($errors), 'An API user could not be created: ' . json_encode($errors, JSON_THROW_ON_ERROR));
 		$creator->save();
 
 		return $creator->getUser();

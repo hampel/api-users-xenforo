@@ -24,7 +24,7 @@ class CommandClassesTest extends TestCase
 		$offenders = [];
 		foreach ($this->assertConsoleCommandsLoad() AS $class)
 		{
-			if (in_array('XF\Cli\Command\AbstractCommand', class_parents($class), true))
+			if (is_subclass_of($class, 'XF\Cli\Command\AbstractCommand'))
 			{
 				$offenders[] = $class;
 			}
@@ -54,7 +54,9 @@ class CommandClassesTest extends TestCase
 		$root = dirname(__DIR__, 2);
 		foreach (['Service/HealthCheck.php', 'Cli/Command/Validate.php', 'Cli/Command/Create.php', 'Cli/Command/ListUsers.php'] AS $path)
 		{
-			foreach (file($root . '/' . $path) AS $number => $line)
+			$lines = file($root . '/' . $path);
+			$this->assertIsArray($lines, $path);
+			foreach ($lines AS $number => $line)
 			{
 				if (preg_match('/XF::log(Error|Exception)\(/', $line) && strpos($line, 'ERROR_LOG_PREFIX') === false)
 				{

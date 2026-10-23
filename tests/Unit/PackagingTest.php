@@ -10,15 +10,28 @@ class PackagingTest extends TestCase
 {
 	private const DEVELOPMENT_ONLY = ['Seed', 'Factory', 'tests', 'vendor', 'TESTING.md', 'CLAUDE.md', 'CLAUDE.local.md', 'phpstan.neon'];
 
+	/**
+	 * @param string $path
+	 *
+	 * @return string
+	 */
+	private function read($path)
+	{
+		$contents = file_get_contents($path);
+		$this->assertIsString($contents, "Could not read {$path}");
+
+		return $contents;
+	}
+
 	public function test_build_json_removes_every_development_only_path_before_it_moves_the_documents(): void
 	{
-		$steps = json_decode(file_get_contents(dirname(__DIR__, 2) . '/build.json'), true)['exec'];
+		$steps = json_decode($this->read(dirname(__DIR__, 2) . '/build.json'), true)['exec'];
 
 		$moves = array_keys(array_filter($steps, function ($step) { return strpos($step, 'mv ') === 0; }));
 		$this->assertNotEmpty($moves);
 
 		// a removal placed after the move deletes nothing: the file has already gone to the zip root
-		$removals = implode("\n", array_filter(array_slice($steps, 0, min($moves)), function ($step)
+		$removals = implode("\n", array_filter(array_slice($steps, 0, $moves[0]), function ($step)
 		{
 			return strpos($step, 'rm ') === 0;
 		}));
@@ -46,7 +59,7 @@ class PackagingTest extends TestCase
 			$files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator("{$root}/{$directory}", \FilesystemIterator::SKIP_DOTS));
 			foreach ($files AS $file)
 			{
-				if (preg_match('/Hampel\\\\(Seeder|ApiUsers\\\\(Seed|Factory))\\\\/', file_get_contents($file->getPathname())))
+				if (preg_match('/Hampel\\\\(Seeder|ApiUsers\\\\(Seed|Factory))\\\\/', $this->read($file->getPathname())))
 				{
 					$referring[] = substr($file->getPathname(), strlen($root) + 1);
 				}
@@ -54,7 +67,7 @@ class PackagingTest extends TestCase
 		}
 		foreach (['Listener.php', 'Setup.php'] AS $file)
 		{
-			if (preg_match('/Hampel\\\\(Seeder|ApiUsers\\\\(Seed|Factory))\\\\/', file_get_contents("{$root}/{$file}")))
+			if (preg_match('/Hampel\\\\(Seeder|ApiUsers\\\\(Seed|Factory))\\\\/', $this->read("{$root}/{$file}")))
 			{
 				$referring[] = $file;
 			}

@@ -257,6 +257,17 @@ template or phrase changed, so only the upgrade was run:
   three links; `validate` exits 0; the forum and the control panel answer; and the error log is
   empty. It was not installed fresh, not run on 2.2, and not uninstalled.
 
+**The `1.0.0b3` zip, on 2026-10-24**, in one sandbox with development off. Its code changed only
+in how it checks the values it reads, and it ships the same files as `1.0.0b2`. So the upgrade
+was run on the floor:
+
+- **An upgrade from the published `1.0.0b2` zip on XenForo 2.2.19 Patch 2 with PHP 7.4.33**, by
+  the real import path, with the job queue run afterwards. Every PHP file in the add-on passed
+  `php -l` on 7.4. The administrator API user made before the upgrade was still listed;
+  `api-users:create` made a second one; `validate` exited 0 with only the expected warning about a
+  user with no key; the forum rendered and the control panel served its login page; and the error
+  log stayed empty. It was not installed fresh, not run on 2.3, and not uninstalled.
+
 ### Counted against other XenForo releases
 
 **Each `user_edit` modification's `find` was counted against the admin templates shipped in eight

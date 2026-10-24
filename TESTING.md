@@ -329,7 +329,7 @@ with no content was converted. No alert, mail or error log row was written.
 `profile_user_id` as well as on `user_id`.** It is the same shape as receiving a conversation,
 which was changed to not count. Unlike a conversation, XenForo sends no profile post when a member
 registers, and a post on the profile of an account that is about to be hidden would disappear
-from view.
+from view. It stays refused, by decision; `CLAUDE.md` has it.
 
 ### Seeding API users
 

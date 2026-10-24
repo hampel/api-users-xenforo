@@ -75,6 +75,12 @@ and `xf_conversation_user` say an account was sent a conversation, which a forum
 does to every account that registers; refusing those refused every normally registered account.
 Starting a conversation and writing a message are in two other tables and still refuse.
 
+**Receiving a profile post still refuses, by decision on 2026-10-24.** Core's map keys
+`xf_profile_post` on `profile_user_id` as well as `user_id`, so an account another member has
+posted to counts as having content. It looks like the conversation case and is not: XenForo posts
+on nobody's profile when they register, and the post is another member's writing, which hiding
+the profile would remove from view.
+
 ## An API user is never merged, and the service is where that is enforced
 
 **Decided by Simon on 2026-10-11: not as the source and not as the target.** As the source it

@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0 (2026-10-24)
+
+First stable release. It is Beta 3 with one change:
+
+- The reasons a conversion is refused are now left-aligned on the *Convert to API user* page,
+  rather than centred around their bullets.
+
 ## 1.0.0 Beta 3 (2026-10-24)
 
 - Internal hardening: what the add-on reads from the database and from other add-ons is now

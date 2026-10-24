@@ -395,5 +395,11 @@ XenForo 2.3.13, and found right:
    password fields read as deliberate, and that its actions menu has no *Merge with user*.
 5. The navigation entry: that *API users* is where an administrator would look for it.
 
-**Not looked at on XenForo 2.2**, where the control panel's markup differs. Look again after any
-change to a template or a modification.
+**Looked at again on 2026-10-24, on XenForo 2.2.19 Patch 2 with PHP 7.4**, in a throwaway sandbox
+with `1.0.0b3` installed from its zip and an account planted for each refusal: a member with a
+thread, one awaiting email confirmation, a moderator, and the acting administrator. All five were
+right except the refusals, which were centred, bullets and all, because the page set them in a
+`confirm` info row. They are now a plain block message, as core's error page is, and were looked
+at again in the same sandbox and found right. The fix is in `1.0.0b4`.
+
+Look again after any change to a template or a modification.

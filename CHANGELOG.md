@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0 Beta 3 (2026-10-24)
+
+- Internal hardening: what the add-on reads from the database and from other add-ons is now
+  checked before it is used. If the user content map supplied through `user_content_change_init`
+  has a malformed entry, conversion now stops with an error, where a malformed entry could
+  otherwise have been skipped. Nothing else has changed in behaviour.
+
 ## 1.0.0 Beta 2 (2026-10-11)
 
 - The add-on's entry in the control panel links to its discussion thread, its resource page and

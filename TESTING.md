@@ -314,6 +314,23 @@ nothing else. The author was refused for its threads and posts, and a member wit
 converted as the control. Until then, the refusal for a vote had been checked only against a row
 the suite inserted itself.
 
+**Profile posts, in a sandbox on 2026-10-24**, XenForo 2.3.13 with PHP 8.3 and Seeder `1.0.0b9`,
+every row written by XenForo's own creators. Each of these members was refused:
+- one who had written a profile post on another member's profile;
+- the member whose profile received it, though that member had written nothing;
+- one whose only content was a comment on that post;
+- one whose only content was a status update.
+
+The refusals named `xf_profile_post`, or `xf_profile_post_comment` for the comment. Two members
+whose only content was a vote, cast in one poll, were refused naming `xf_poll_vote`, and a member
+with no content was converted. No alert, mail or error log row was written.
+
+**The refusal of the receiving member follows from core's map, which keys `xf_profile_post` on
+`profile_user_id` as well as on `user_id`.** It is the same shape as receiving a conversation,
+which was changed to not count. Unlike a conversation, XenForo sends no profile post when a member
+registers, and a post on the profile of an account that is about to be hidden would disappear
+from view.
+
 ### Seeding API users
 
 `Seed/ApiUserSeeder` makes API users in each state the list page shows, on a forum that has the

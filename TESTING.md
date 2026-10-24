@@ -268,6 +268,21 @@ was run on the floor:
   user with no key; the forum rendered and the control panel served its login page; and the error
   log stayed empty. It was not installed fresh, not run on 2.3, and not uninstalled.
 
+**The `1.0.0` zip, on 2026-10-24**, in two sandboxes with development off. Over `1.0.0b3` it
+changes one template, and it ships the same files:
+
+- **An upgrade from the published `1.0.0b3` zip on XenForo 2.2.19 Patch 2 with PHP 7.4.33**, by
+  the real import path, with the job queue run afterwards. Every PHP file passed `php -l` on 7.4;
+  the administrator API user made before the upgrade was still listed with its note;
+  `api-users:create` made a second; the convert template in the database was the new one;
+  `validate` exited 0 with only the no-key warning; the forum rendered, the control panel served
+  its login page, and the error log stayed empty.
+- **A fresh install and an uninstall on XenForo 2.3.13 with PHP 8.3.36**, by the real import
+  path. Two API users made after the install were on the API-only scheme and `validate` exited 0
+  with only the no-key warning. The uninstall moved both to `XF:NoPassword`, dropped the table, and
+  left no class extension, phrase, template, modification, admin permission, navigation entry,
+  route or listener behind; the forum still rendered, and the error log was empty throughout.
+
 ### Counted against other XenForo releases
 
 **Each `user_edit` modification's `find` was counted against the admin templates shipped in eight

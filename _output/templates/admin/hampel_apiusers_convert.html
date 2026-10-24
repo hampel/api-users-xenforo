@@ -1,19 +1,13 @@
 <xf:title>{{ phrase('hampel_apiusers_convert_x_to_api_user', {'name': $user.username}) }}</xf:title>
 
 <xf:if is="$blockers is not empty">
-	<div class="block">
-		<div class="block-container">
-			<div class="block-body">
-				<xf:inforow rowtype="confirm">
-					{{ phrase('hampel_apiusers_x_cannot_be_converted', {'name': $user.username}) }}
-					<ul>
-						<xf:foreach loop="$blockers" value="$blocker">
-							<li>{$blocker}</li>
-						</xf:foreach>
-					</ul>
-				</xf:inforow>
-			</div>
-		</div>
+	<div class="blockMessage">
+		{{ phrase('hampel_apiusers_x_cannot_be_converted', {'name': $user.username}) }}
+		<ul>
+			<xf:foreach loop="$blockers" value="$blocker">
+				<li>{$blocker}</li>
+			</xf:foreach>
+		</ul>
 	</div>
 <xf:else />
 	<xf:form action="{{ link('api-users/convert', $user) }}" ajax="true" class="block">

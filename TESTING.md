@@ -290,6 +290,22 @@ changes one template, and it ships the same files:
   left no class extension, phrase, template, modification, admin permission, navigation entry,
   route or listener behind; the forum still rendered, and the error log was empty throughout.
 
+**The `1.1.0` zip, on 2026-11-08**, upgraded from the published `1.0.0` zip in two sandboxes with
+development off, one on XenForo 2.2.19 Patch 2 with PHP 7.4.33 and one on 2.3.13 with PHP 8.3.36.
+On both:
+
+- the upgrade took the real import path, left no `_output/`, and the job queue was run afterwards;
+- an API user made on `1.0.0` with a note kept it through the upgrade, and `api-users:note`
+  changed it and exited 0, and exited 1 for a name nobody has;
+- all six modifications were enabled and `validate` reported all six applying, which on 2.2 is
+  the new field's pattern matching 2.2's own `user_edit`; the new edit template and phrases were
+  present, and `validate` exited 0 with only the no-key warning;
+- the forum rendered and the error log stayed empty.
+
+Every PHP file passed `php -l` on 7.4. The 2.3 instance was then uninstalled: the API user moved to
+`XF:NoPassword`, the table, add-on row, modifications and phrases were gone, and the forum still
+rendered with an empty error log.
+
 ### Counted against other XenForo releases
 
 **Each `user_edit` modification's `find` was counted against the admin templates shipped in eight

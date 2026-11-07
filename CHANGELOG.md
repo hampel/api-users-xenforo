@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.1.0 (2026-11-08)
 
 - An API user's note can now be changed. Click the account in the list of API users, use the
   *API user note* field below the user name on the account's edit page, or run

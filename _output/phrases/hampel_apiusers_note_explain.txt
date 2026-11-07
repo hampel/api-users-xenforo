@@ -1,1 +1,1 @@
-What this account is for. It is shown only in the list of API users.
+What this account is for. Only administrators see it.

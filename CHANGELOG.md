@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- An API user's note can now be changed. Click the account in the list of API users, use the
+  *API user note* field below the user name on the account's edit page, or run
+  `api-users:note`. The list's *Edit user* link opens the account's edit page, as clicking the
+  account did before.
+
 ## 1.0.0 (2026-10-24)
 
 First stable release. It is Beta 3 with one change:

@@ -93,11 +93,16 @@ Core runs a merge as a job, and a job that throws is not finished; one that comp
 admin controller's `actionMerge()` is extended only to give an administrator the reason before a
 job is queued. Both are registered against the 2.2 class names, by hand, as the finder is.
 
-## The user edit page is changed by five template modifications, and only for display
+## The user edit page is changed by six template modifications, and only one saves anything
 
-A notice, the *Convert to API user* action, the email and password fields replaced by a note, and
-*Merge with user* left out of an API user's actions menu.
-**None of them is the enforcement** — the entity guards are, and they hold with every modification
+A notice, the *Convert to API user* action, the email and password fields replaced by a note,
+*Merge with user* left out of an API user's actions menu, and an *API user note* field below the
+user name. The note field is saved by extending `userSaveProcess()`, through the same
+`NoteEditor` service as this add-on's edit page and the `api-users:note` command, and only for an
+administrator with *Manage API users*. The template hides the field without that permission and
+the controller checks it again. The field is named `api_user_note`, outside core's `user[...]`
+array, so core's save never reads it.
+**None of the modifications is the enforcement** — the entity guards are, and they hold with every modification
 disabled. Core's save reads an absent email field as empty and an absent password choice as
 no change, which is why hiding the fields is safe. The email and password modifications are
 regular expressions because the email row differs between XenForo 2.2 and 2.3.

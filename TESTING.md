@@ -135,14 +135,19 @@ so either can still be null.
   inside it; the profile checks.
 - `CoreAdministratorPageTest` — core's own administrator save, driven against an API user: adding
   one and editing one both leave it API-only and send no mail.
+- `CoreUserEditNoteTest` — the note field on core's user edit page, saved through core's own
+  controller: it changes and clears the note, a note over 255 characters refuses the whole save, a
+  save without the field leaves the note, and the field is ignored without *Manage API users* and
+  for a member.
 - `AdminControllerTest` — the permission, the two extra requirements for an administrator, where
   each save redirects to, and that no write is reachable without a CSRF token. The edit page
   changes the note and nothing else, refuses one over 255 characters, and has no page for a member. Each refusal is
   asserted by its message, since several of them share a response code.
 - `RenderingTest` — the four pages rendered: titles, the notes and labels each state shows, no
   phrase left as its key and no template error. And core's user edit page with the modifications
-  applied: an API user's has the notice and neither field; a member's has both fields and the
-  convert action; an administrator without the permission is given no link into this add-on; the
+  applied: an API user's has the notice, neither field, and the note field below the user name; a
+  member's has both fields and the
+  convert action; an administrator without the permission is given no link into this add-on and no note field; the
   add-user page is unchanged.
 - `HealthCheckTest`, `CommandsTest` — each drift a guard cannot prevent is reported, and the exit
   contract. `note` changes and clears a note, and exits 1 on one too long, a member or a name
@@ -424,5 +429,6 @@ at again in the same sandbox and found right. The fix is in `1.0.0b4`.
 6. The list's *Edit user* link beside each account, and that clicking the account itself opening
    its note reads as expected.
 7. The edit page at `api-users/<id>/edit`: the note field, and the *Edit user* button.
+8. The *API user note* field below the user name on core's user edit page, on 2.2 and 2.3.
 
 Look again after any change to a template or a modification.

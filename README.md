@@ -66,7 +66,8 @@ php cmd.php api-users:list
 ### Changing the note
 
 Click an API user in the list to change its note; *Edit user* beside it opens the account's own
-edit page. From the command line, `""` clears it:
+edit page. The account's edit page has the same field, *API user note*, below the user name. Both
+need the **Manage API users** permission. From the command line, `""` clears it:
 
 ```bash
 php cmd.php api-users:note "Monitor" "what it is for now"

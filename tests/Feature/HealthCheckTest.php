@@ -173,7 +173,7 @@ class HealthCheckTest extends TestCase
 	{
 		$db = $this->app()->db();
 		$ids = $db->fetchAllColumn('SELECT modification_id FROM xf_template_modification WHERE addon_id = ?', 'Hampel/ApiUsers');
-		$this->assertCount(5, $ids);
+		$this->assertCount(6, $ids);
 		foreach ($ids AS $id)
 		{
 			$db->delete('xf_template_modification', 'modification_id = ?', $id);

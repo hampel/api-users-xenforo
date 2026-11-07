@@ -5,7 +5,7 @@ use Tests\TestCase;
 
 /**
  * What an administrator is actually shown: this add-on's four pages, and core's user edit page
- * with the four modifications applied. The controller tests stop at the reply.
+ * with its six modifications applied. The controller tests stop at the reply.
  */
 class RenderingTest extends TestCase
 {
@@ -19,6 +19,7 @@ class RenderingTest extends TestCase
 	private const CONVERT = 'Convert to API user';
 	private const EMAIL_INPUT = 'name="user[email]"';
 	private const PASSWORD_CHOICE = 'name="change_password"';
+	private const NOTE_INPUT = 'name="api_user_note"';
 
 	protected function setUp(): void
 	{
@@ -146,8 +147,9 @@ class RenderingTest extends TestCase
 		$this->assertNoTemplateErrors(self::TEMPLATES);
 	}
 
-	public function test_all_five_edit_page_modifications_are_applied(): void
+	public function test_all_six_edit_page_modifications_are_applied(): void
 	{
+		$this->assertTemplateModificationApplied('hampelApiUsersUserEditNote');
 		$this->assertTemplateModificationApplied('hampelApiUsersUserEditNotice');
 		$this->assertTemplateModificationApplied('hampelApiUsersUserEditConvert');
 		$this->assertTemplateModificationApplied('hampelApiUsersUserEditEmail');
@@ -158,7 +160,7 @@ class RenderingTest extends TestCase
 	public function test_an_api_user_edit_page_carries_the_notice_and_no_email_or_password_field(): void
 	{
 		$this->actingAsAdministrator(['user' => true, 'hampelApiUsers' => true]);
-		$user = $this->createApiUser();
+		$user = $this->createApiUser(false, 'the stock sync');
 
 		[$html, $actions] = $this->editPage($this->idOf($user));
 
@@ -167,6 +169,12 @@ class RenderingTest extends TestCase
 		$this->assertSame(2, substr_count($html, self::NONE), 'one note for the email field and one for the password');
 		$this->assertDontSee($html, self::EMAIL_INPUT, false);
 		$this->assertDontSee($html, self::PASSWORD_CHOICE, false);
+		$this->assertSee($html, 'API user note');
+		$this->assertSee($html, self::NOTE_INPUT, false);
+		$this->assertSee($html, 'value="the stock sync"', false);
+		$this->assertGreaterThan(
+			strpos($html, 'name="user[username]"'), strpos($html, self::NOTE_INPUT), 'below the user name'
+		);
 		$this->assertSee($actions, 'Manage watched threads');
 		$this->assertDontSee($actions, self::CONVERT);
 		$this->assertDontSee($actions, 'Merge with user');
@@ -189,6 +197,7 @@ class RenderingTest extends TestCase
 		$this->assertNoUnresolvedPhrases($actions, self::PHRASES);
 		$this->assertDontSee($html, self::NOTICE);
 		$this->assertDontSee($html, self::NONE);
+		$this->assertDontSee($html, self::NOTE_INPUT, false);
 		$this->assertNoUnresolvedPhrases($html, self::PHRASES);
 	}
 
@@ -204,6 +213,7 @@ class RenderingTest extends TestCase
 		$this->assertSee($apiUserPage, self::NOTICE);
 		$this->assertDontSee($apiUserPage, self::EMAIL_INPUT, false);
 		$this->assertDontSee($apiUserPage, 'api-users', false);
+		$this->assertDontSee($apiUserPage, self::NOTE_INPUT, false);
 
 		[$memberPage, $actions] = $this->editPage($this->idOf($member));
 
@@ -235,7 +245,7 @@ class RenderingTest extends TestCase
 		$this->assertSame('Edit API user: ' . $user->username, (string) $this->pageParam('pageTitle'));
 		$this->assertSee($html, 'name="note"', false);
 		$this->assertSee($html, 'value="the stock sync"', false);
-		$this->assertSee($html, 'It is shown only in the list of API users.');
+		$this->assertSee($html, 'Only administrators see it.');
 		$this->assertStringContainsString('Edit user', $action);
 		$this->assertStringContainsString(htmlspecialchars($this->app()->router('admin')->buildLink('users/edit', $user)), $action);
 		$this->assertNoUnresolvedPhrases($html, self::PHRASES);

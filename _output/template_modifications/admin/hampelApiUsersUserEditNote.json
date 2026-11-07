@@ -1,0 +1,9 @@
+{
+    "template": "user_edit",
+    "description": "Let the note of an API user be changed below its user name",
+    "execution_order": 10,
+    "enabled": true,
+    "action": "preg_replace",
+    "find": "#<xf:textboxrow name=\"user\\[username\\]\".*</xf:textboxrow>#sU",
+    "replace": "$0\n\n\t\t\t\t\t<xf:if is=\"$user.user_id AND $user.ApiUser AND $xf.visitor.hasAdminPermission('hampelApiUsers')\">\n\t\t\t\t\t\t<xf:textboxrow name=\"api_user_note\" value=\"{$user.ApiUser.note}\" maxlength=\"255\"\n\t\t\t\t\t\t\tlabel=\"{{ phrase('hampel_apiusers_api_user_note') }}\"\n\t\t\t\t\t\t\texplain=\"{{ phrase('hampel_apiusers_note_explain') }}\" />\n\t\t\t\t\t</xf:if>"
+}

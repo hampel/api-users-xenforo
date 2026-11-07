@@ -17,9 +17,9 @@ checked. For whoever changes it next.
 | admin route | `api-users/` → `Admin\Controller\ApiUser` |
 | admin permission | `hampelApiUsers` |
 | admin navigation | `hampelApiUsers`, under `serviceProviders` |
-| templates | admin `hampel_apiusers_list`, `hampel_apiusers_add`, `hampel_apiusers_convert` |
+| templates | admin `hampel_apiusers_list`, `hampel_apiusers_add`, `hampel_apiusers_edit`, `hampel_apiusers_convert` |
 | template modification | admin `user_edit` × 5 — notice, convert action, email field, password field, merge action |
-| CLI command | `api-users:create`, `api-users:list`, `api-users:validate` |
+| CLI command | `api-users:create`, `api-users:list`, `api-users:note`, `api-users:validate` |
 | code event listener | `hampel_admin_api_redaction` → `Listener::adminApiRedaction` |
 | config key read | another add-on's: `archiveSite.protectedUsers`, `archiveSiteProtectedUsers` |
 
@@ -136,15 +136,17 @@ so either can still be null.
 - `CoreAdministratorPageTest` — core's own administrator save, driven against an API user: adding
   one and editing one both leave it API-only and send no mail.
 - `AdminControllerTest` — the permission, the two extra requirements for an administrator, where
-  each save redirects to, and that neither write is reachable without a CSRF token. Each refusal is
+  each save redirects to, and that no write is reachable without a CSRF token. The edit page
+  changes the note and nothing else, refuses one over 255 characters, and has no page for a member. Each refusal is
   asserted by its message, since several of them share a response code.
-- `RenderingTest` — the three pages rendered: titles, the notes and labels each state shows, no
+- `RenderingTest` — the four pages rendered: titles, the notes and labels each state shows, no
   phrase left as its key and no template error. And core's user edit page with the modifications
   applied: an API user's has the notice and neither field; a member's has both fields and the
   convert action; an administrator without the permission is given no link into this add-on; the
   add-user page is unchanged.
 - `HealthCheckTest`, `CommandsTest` — each drift a guard cannot prevent is reported, and the exit
-  contract. Neither shows `validate` reporting an extension that is not applied. A class extension
+  contract. `note` changes and clears a note, and exits 1 on one too long, a member or a name
+  nobody has. Neither shows `validate` reporting an extension that is not applied. A class extension
   resolved once in a process cannot be taken away for one test, so it would take the check reading
   an expected list a test can replace, which it does not yet.
 - `ClassExtensionsTest` — all five extensions are registered against the 2.2 class names and
@@ -416,5 +418,11 @@ thread, one awaiting email confirmation, a moderator, and the acting administrat
 right except the refusals, which were centred, bullets and all, because the page set them in a
 `confirm` info row. They are now a plain block message, as core's error page is, and were looked
 at again in the same sandbox and found right. The fix is in `1.0.0b4`.
+
+**Not yet looked at, on either line:**
+
+6. The list's *Edit user* link beside each account, and that clicking the account itself opening
+   its note reads as expected.
+7. The edit page at `api-users/<id>/edit`: the note field, and the *Edit user* button.
 
 Look again after any change to a template or a modification.

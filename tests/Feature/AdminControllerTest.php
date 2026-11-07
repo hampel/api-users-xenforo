@@ -67,6 +67,7 @@ class AdminControllerTest extends TestCase
 		$this->assertReplyIsError($this->dispatch('api-users', 'admin'), 403);
 		$this->assertReplyIsError($this->dispatch('api-users/add', 'admin'), 403);
 		$this->assertReplyIsError($this->save(['username' => $this->uniqueName('acp')]), 403);
+		$this->assertReplyIsError($this->dispatch('api-users/1/edit', 'admin'), 403);
 	}
 
 	public function test_the_list_shows_the_api_users_and_their_key_counts(): void
@@ -251,5 +252,83 @@ class AdminControllerTest extends TestCase
 
 		$this->admin(['hampelApiUsers', 'admin']);
 		$this->assertTrue($this->replyParam($this->dispatch('api-users/add', 'admin'), 'canMakeAdmin'));
+	}
+
+	/**
+	 * @param int $userId
+	 * @return string|false
+	 */
+	private function noteOf($userId)
+	{
+		$note = $this->app()->db()->fetchOne('SELECT note FROM xf_hampel_apiusers_user WHERE user_id = ?', $userId);
+
+		return $note === false ? false : $this->asText($note);
+	}
+
+	public function test_the_edit_page_shows_the_note(): void
+	{
+		$this->admin(['hampelApiUsers']);
+		$user = $this->createApiUser(false, 'the nightly export');
+
+		$reply = $this->dispatch('api-users/' . $user->user_id . '/edit', 'admin');
+
+		$this->assertReplyTemplate($reply, 'hampel_apiusers_edit');
+		$this->assertSame('the nightly export', $this->noteOf($this->idOf($user)));
+	}
+
+	public function test_saving_the_edit_page_changes_the_note_and_nothing_else(): void
+	{
+		$this->admin(['hampelApiUsers']);
+		$user = $this->createApiUser(true, 'the nightly export');
+		$before = $this->app()->db()->fetchRow('SELECT * FROM xf_hampel_apiusers_user WHERE user_id = ?', $user->user_id);
+
+		$reply = $this->dispatch('api-users/' . $user->user_id . '/edit', 'admin', ['note' => 'the hourly export'], [], 'POST');
+
+		$this->assertReplyIsRedirect($reply, $this->app()->router('admin')->buildLink('api-users'));
+		$after = $this->app()->db()->fetchRow('SELECT * FROM xf_hampel_apiusers_user WHERE user_id = ?', $user->user_id);
+		$this->assertIsArray($before);
+		$this->assertSame(array_merge($before, ['note' => 'the hourly export']), $after);
+		$this->assertIsApiOnly($this->idOf($user));
+	}
+
+	public function test_an_empty_note_clears_it(): void
+	{
+		$this->admin(['hampelApiUsers']);
+		$user = $this->createApiUser(false, 'the nightly export');
+
+		$this->dispatch('api-users/' . $user->user_id . '/edit', 'admin', ['note' => ''], [], 'POST');
+
+		$this->assertSame('', $this->noteOf($this->idOf($user)));
+	}
+
+	public function test_a_note_over_255_characters_is_refused_and_the_old_one_kept(): void
+	{
+		$this->admin(['hampelApiUsers']);
+		$user = $this->createApiUser(false, 'the nightly export');
+
+		$reply = $this->dispatch('api-users/' . $user->user_id . '/edit', 'admin', ['note' => str_repeat('x', 256)], [], 'POST');
+
+		$this->assertReplyIsError($reply, null, $this->corePhrase('hampel_apiusers_note_is_too_long'));
+		$this->assertSame('the nightly export', $this->noteOf($this->idOf($user)));
+	}
+
+	/** The page edits an API user's record, so a member has no page here. */
+	public function test_an_ordinary_member_has_no_edit_page(): void
+	{
+		$this->admin(['hampelApiUsers']);
+		$member = $this->createMember();
+
+		$this->assertReplyIsError($this->dispatch('api-users/' . $member->user_id . '/edit', 'admin'), 404);
+		$this->assertReplyIsError($this->dispatch('api-users/' . $member->user_id . '/edit', 'admin', ['note' => 'x'], [], 'POST'), 404);
+		$this->assertFalse($this->noteOf($this->idOf($member)));
+	}
+
+	public function test_saving_a_note_needs_a_csrf_token(): void
+	{
+		$this->admin(['hampelApiUsers']);
+		$user = $this->createApiUser(false, 'the nightly export');
+
+		$this->assertReplyIsError($this->dispatchWithoutCsrfToken('api-users/' . $user->user_id . '/edit', 'admin', ['note' => 'changed']));
+		$this->assertSame('the nightly export', $this->noteOf($this->idOf($user)));
 	}
 }

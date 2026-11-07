@@ -119,6 +119,12 @@
         "version_string": "1.0.0a1",
         "hash": "49ac847a995a617711fd03915755787a"
     },
+    "hampel_apiusers_edit_api_user_x.txt": {
+        "global_cache": false,
+        "version_id": 1000111,
+        "version_string": "1.0.1a1",
+        "hash": "266ccd3ef6a0910a672e048fd263580d"
+    },
     "hampel_apiusers_make_administrator.txt": {
         "global_cache": false,
         "version_id": 1000011,

@@ -4,7 +4,7 @@ use Hampel\Testing\Concerns\UsesDatabaseTransactions;
 use Tests\TestCase;
 
 /**
- * What an administrator is actually shown: this add-on's three pages, and core's user edit page
+ * What an administrator is actually shown: this add-on's four pages, and core's user edit page
  * with the four modifications applied. The controller tests stop at the reply.
  */
 class RenderingTest extends TestCase
@@ -65,6 +65,10 @@ class RenderingTest extends TestCase
 		$this->assertSee($html, 'the stock sync');
 		$this->assertSee($html, 'No API key');
 		$this->assertSeeText($html, 'by ' . $madeBy->username);
+		$router = $this->app()->router('admin');
+		$this->assertSee($html, 'href="' . htmlspecialchars($router->buildLink('api-users/edit', $user)) . '"', false);
+		$this->assertSee($html, 'href="' . htmlspecialchars($router->buildLink('users/edit', $user)) . '"', false);
+		$this->assertSee($html, 'Edit user');
 		$this->assertDontSee($html, 'Not API-only');
 		$this->assertNoUnresolvedPhrases($html, self::PHRASES);
 		$this->assertNoTemplateErrors(self::TEMPLATES);
@@ -218,5 +222,23 @@ class RenderingTest extends TestCase
 		$this->assertDontSee($html, self::NOTICE);
 		$this->assertDontSee($html, self::NONE);
 		$this->assertDontSee($html, self::CONVERT);
+	}
+
+	public function test_the_edit_page_offers_the_note_and_a_way_to_the_account(): void
+	{
+		$this->actingAsAdministrator(['hampelApiUsers' => true]);
+		$user = $this->createApiUser(false, 'the stock sync');
+
+		$html = $this->renderReply($this->dispatch('api-users/' . $user->user_id . '/edit', 'admin'));
+		$action = (string) $this->pageParam('pageAction');
+
+		$this->assertSame('Edit API user: ' . $user->username, (string) $this->pageParam('pageTitle'));
+		$this->assertSee($html, 'name="note"', false);
+		$this->assertSee($html, 'value="the stock sync"', false);
+		$this->assertSee($html, 'It is shown only in the list of API users.');
+		$this->assertStringContainsString('Edit user', $action);
+		$this->assertStringContainsString(htmlspecialchars($this->app()->router('admin')->buildLink('users/edit', $user)), $action);
+		$this->assertNoUnresolvedPhrases($html, self::PHRASES);
+		$this->assertNoTemplateErrors(self::TEMPLATES);
 	}
 }

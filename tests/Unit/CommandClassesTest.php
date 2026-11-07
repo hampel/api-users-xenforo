@@ -2,6 +2,7 @@
 
 use Hampel\ApiUsers\Cli\Command\Create;
 use Hampel\ApiUsers\Cli\Command\ListUsers;
+use Hampel\ApiUsers\Cli\Command\Note;
 use Hampel\ApiUsers\Cli\Command\Validate;
 use Tests\TestCase;
 
@@ -16,7 +17,7 @@ class CommandClassesTest extends TestCase
 		$classes = $this->assertConsoleCommandsLoad();
 
 		sort($classes);
-		$this->assertSame([Create::class, ListUsers::class, Validate::class], $classes);
+		$this->assertSame([Create::class, ListUsers::class, Note::class, Validate::class], $classes);
 	}
 
 	public function test_no_command_depends_on_a_base_class_missing_from_xenforo_2_2(): void
@@ -52,7 +53,7 @@ class CommandClassesTest extends TestCase
 	{
 		$offenders = [];
 		$root = dirname(__DIR__, 2);
-		foreach (['Service/HealthCheck.php', 'Cli/Command/Validate.php', 'Cli/Command/Create.php', 'Cli/Command/ListUsers.php'] AS $path)
+		foreach (['Service/HealthCheck.php', 'Cli/Command/Validate.php', 'Cli/Command/Create.php', 'Cli/Command/ListUsers.php', 'Cli/Command/Note.php'] AS $path)
 		{
 			$lines = file($root . '/' . $path);
 			$this->assertIsArray($lines, $path);

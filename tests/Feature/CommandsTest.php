@@ -2,6 +2,7 @@
 
 use Hampel\ApiUsers\Cli\Command\Create;
 use Hampel\ApiUsers\Cli\Command\ListUsers;
+use Hampel\ApiUsers\Cli\Command\Note;
 use Hampel\ApiUsers\Cli\Command\Validate;
 use Hampel\Testing\Concerns\UsesDatabaseTransactions;
 use Tests\TestCase;
@@ -135,5 +136,66 @@ class CommandsTest extends TestCase
 
 		$this->assertContains($tester->getStatusCode(), [0, 1]);
 		$this->assertSame($before, $this->app()->db()->fetchRow('SELECT * FROM xf_user_authenticate WHERE user_id = ?', $user->user_id));
+	}
+
+	/**
+	 * @param int $userId
+	 * @return mixed
+	 */
+	private function noteOf($userId)
+	{
+		return $this->app()->db()->fetchOne('SELECT note FROM xf_hampel_apiusers_user WHERE user_id = ?', $userId);
+	}
+
+	public function test_note_changes_an_api_user_s_note(): void
+	{
+		$user = $this->createApiUser(false, 'the old note');
+
+		$tester = $this->runConsoleCommand(Note::class, ['username' => $user->username, 'note' => 'the new note']);
+
+		$this->assertSame(0, $tester->getStatusCode());
+		$this->assertStringContainsString('the new note', $tester->getDisplay());
+		$this->assertSame('the new note', $this->noteOf($this->idOf($user)));
+	}
+
+	public function test_note_with_an_empty_string_clears_it(): void
+	{
+		$user = $this->createApiUser(false, 'the old note');
+
+		$tester = $this->runConsoleCommand(Note::class, ['username' => $user->username, 'note' => '']);
+
+		$this->assertSame(0, $tester->getStatusCode());
+		$this->assertStringContainsString('Cleared the note', $tester->getDisplay());
+		$this->assertSame('', $this->noteOf($this->idOf($user)));
+	}
+
+	public function test_note_refuses_one_over_255_characters_and_exits_1(): void
+	{
+		$user = $this->createApiUser(false, 'the old note');
+
+		$tester = $this->runConsoleCommand(Note::class, ['username' => $user->username, 'note' => str_repeat('x', 256)]);
+
+		$this->assertSame(1, $tester->getStatusCode());
+		$this->assertStringContainsString('255 characters', $tester->getDisplay());
+		$this->assertSame('the old note', $this->noteOf($this->idOf($user)));
+	}
+
+	public function test_note_refuses_an_ordinary_member_and_writes_no_row(): void
+	{
+		$member = $this->createMember();
+
+		$tester = $this->runConsoleCommand(Note::class, ['username' => $member->username, 'note' => 'x']);
+
+		$this->assertSame(1, $tester->getStatusCode());
+		$this->assertStringContainsString('is not an API user', $tester->getDisplay());
+		$this->assertFalse($this->noteOf($this->idOf($member)));
+	}
+
+	public function test_note_refuses_a_name_nobody_has(): void
+	{
+		$tester = $this->runConsoleCommand(Note::class, ['username' => $this->uniqueName('nobody'), 'note' => 'x']);
+
+		$this->assertSame(1, $tester->getStatusCode());
+		$this->assertStringContainsString('could not be found', $tester->getDisplay());
 	}
 }

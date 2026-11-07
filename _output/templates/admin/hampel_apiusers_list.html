@@ -14,7 +14,7 @@
 					<xf:foreach loop="$apiUsers" key="$userId" value="$apiUser">
 						<xf:datarow>
 							<xf:if is="$apiUser.User">
-								<xf:main href="{{ link('users/edit', $apiUser.User) }}">
+								<xf:main href="{{ link('api-users/edit', $apiUser.User) }}">
 									<xf:label>
 										{$apiUser.User.username}
 										<xf:if is="$apiUser.User.is_admin">
@@ -27,7 +27,7 @@
 									<xf:hint>{$apiUser.note}</xf:hint>
 								</xf:main>
 							<xf:else />
-								<xf:main>
+								<xf:main href="{{ link('api-users/edit', $apiUser) }}">
 									<xf:label>{{ phrase('deleted_member') }} ({$userId})</xf:label>
 									<xf:hint>{$apiUser.note}</xf:hint>
 								</xf:main>
@@ -46,6 +46,11 @@
 									'name': $apiUser.CreatedBy ? $apiUser.CreatedBy.username : phrase('hampel_apiusers_command_line')
 								}) }}</span>
 							</xf:cell>
+							<xf:if is="$apiUser.User">
+								<xf:action href="{{ link('users/edit', $apiUser.User) }}">{{ phrase('edit_user') }}</xf:action>
+							<xf:else />
+								<xf:cell class="dataList-cell--action" />
+							</xf:if>
 						</xf:datarow>
 					</xf:foreach>
 				</xf:datalist>

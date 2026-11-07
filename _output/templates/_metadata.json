@@ -9,9 +9,14 @@
         "version_string": "1.0.0b4",
         "hash": "39c75e9b9a5e6ed881367f0a12238c9d"
     },
+    "admin/hampel_apiusers_edit.html": {
+        "version_id": 1000111,
+        "version_string": "1.0.1a1",
+        "hash": "90e42d4a0d1bd1f1347a2bdbd73f7c28"
+    },
     "admin/hampel_apiusers_list.html": {
-        "version_id": 1000011,
-        "version_string": "1.0.0a1",
-        "hash": "e2f43df072b9732ab61b734a0904a055"
+        "version_id": 1000111,
+        "version_string": "1.0.1a1",
+        "hash": "d773c83c78f62f46314a579a55c5cc25"
     }
 }

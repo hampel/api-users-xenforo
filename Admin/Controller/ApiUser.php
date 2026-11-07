@@ -143,6 +143,41 @@ class ApiUser extends AbstractController
 	}
 
 	/**
+	 * The API user's own page: its note, which is all of it this add-on lets be changed. The
+	 * account itself is edited on core's user edit page, which this page links to.
+	 *
+	 * @param ParameterBag $params
+	 * @return \XF\Mvc\Reply\AbstractReply
+	 */
+	public function actionEdit(ParameterBag $params)
+	{
+		/** @var \Hampel\ApiUsers\Entity\ApiUser $apiUser */
+		$apiUser = $this->assertRecordExists('Hampel\ApiUsers:ApiUser', $params->user_id, ['User'], 'requested_user_not_found');
+
+		if ($this->isPost())
+		{
+			/** @var \Hampel\ApiUsers\Service\ApiUser\NoteEditor $editor */
+			$editor = $this->service('Hampel\ApiUsers:ApiUser\NoteEditor', $apiUser);
+			$editor->setNote($this->filter('note', 'str'));
+
+			if (!$editor->validate($errors))
+			{
+				return $this->error($errors);
+			}
+
+			$editor->save();
+
+			return $this->redirect($this->buildLink('api-users'));
+		}
+
+		$viewParams = [
+			'apiUser' => $apiUser,
+			'userId' => $apiUser->user_id,
+		];
+		return $this->view('Hampel\ApiUsers:ApiUser\Edit', 'hampel_apiusers_edit', $viewParams);
+	}
+
+	/**
 	 * @return bool
 	 */
 	protected function canMakeAdmin()

@@ -63,6 +63,15 @@ php cmd.php api-users:create "Monitor" --admin
 php cmd.php api-users:list
 ```
 
+### Changing the note
+
+Click an API user in the list to change its note; *Edit user* beside it opens the account's own
+edit page. From the command line, `""` clears it:
+
+```bash
+php cmd.php api-users:note "Monitor" "what it is for now"
+```
+
 ### From an existing account
 
 On a user's edit page, *Actions > Convert to API user* turns that account into an API user. It

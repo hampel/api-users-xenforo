@@ -1,0 +1,18 @@
+<xf:title>{{ phrase('hampel_apiusers_edit_api_user_x', {'name': $apiUser.User ? $apiUser.User.username : phrase('deleted_member')}) }}</xf:title>
+
+<xf:if is="$apiUser.User">
+	<xf:pageaction>
+		<xf:button href="{{ link('users/edit', $apiUser.User) }}" icon="edit">{{ phrase('edit_user') }}</xf:button>
+	</xf:pageaction>
+</xf:if>
+
+<xf:form action="{{ link('api-users/edit', $apiUser.User ? $apiUser.User : $apiUser) }}" ajax="true" class="block">
+	<div class="block-container">
+		<div class="block-body">
+			<xf:textboxrow name="note" value="{$apiUser.note}" maxlength="255"
+				label="{{ phrase('note') }}" autofocus="autofocus"
+				explain="{{ phrase('hampel_apiusers_note_explain') }}" />
+		</div>
+		<xf:submitrow icon="save" sticky="true" />
+	</div>
+</xf:form>

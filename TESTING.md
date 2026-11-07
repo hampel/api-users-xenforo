@@ -424,11 +424,15 @@ right except the refusals, which were centred, bullets and all, because the page
 `confirm` info row. They are now a plain block message, as core's error page is, and were looked
 at again in the same sandbox and found right. The fix is in `1.0.0b4`.
 
-**Not yet looked at, on either line:**
+**Looked at by the author on 2026-11-08, on XenForo 2.3.13 on the development forum, before
+`1.1.0`**, and found right, both ways of changing a note included:
 
-6. The list's *Edit user* link beside each account, and that clicking the account itself opening
-   its note reads as expected.
+6. The list's *Edit user* link beside each account, and that clicking the account itself opens
+   its note.
 7. The edit page at `api-users/<id>/edit`: the note field, and the *Edit user* button.
-8. The *API user note* field below the user name on core's user edit page, on 2.2 and 2.3.
+8. The *API user note* field below the user name on core's user edit page.
+
+**Not looked at on 2.2.** The field's pattern matches core's user edit template once on 2.2.0
+Patch 2 and 2.2.19 Patch 2, read from the dist zips, but no 2.2 page with it has been seen.
 
 Look again after any change to a template or a modification.
